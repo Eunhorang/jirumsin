@@ -289,6 +289,17 @@
 .buy-panel h3 { font-family: var(--font-display); font-weight: 400; font-size: var(--t-xl); }
 .input[aria-invalid="true"] { border-color: var(--red); }
 .actions.is-static { position: static; }
+
+/* ── 영수증 이미지 ─────────────────────── */
+.card-dialog { border: 0; padding: 0; background: transparent; color: var(--ink); width: min(480px, calc(100vw - 32px)); max-height: calc(100vh - 32px); overflow: auto; }
+.card-dialog::backdrop { background: rgba(10, 12, 16, .62); }
+.card-box { background: var(--paper); border-radius: var(--r-md); box-shadow: var(--shadow); padding: 18px; display: grid; gap: 12px; }
+.card-box h2 { font-family: var(--font-display); font-weight: 400; font-size: var(--t-xl); }
+.card-box img { display: block; width: 100%; height: auto; max-height: 58vh; object-fit: contain; border-radius: var(--r-sm); background: var(--paper-2); }
+.card-msg { font-size: var(--t-sm); font-weight: 600; }
+.card-msg:empty { display: none; }
+.card-btns { display: flex; flex-wrap: wrap; gap: 8px; }
+.card-btns .btn { flex: 1 1 auto; }
 /* 휴대폰: 결정 바를 두 줄로 줄여 화면을 덜 가린다 */
 @media (max-width: 560px) {
   .actions { gap: 6px; padding: 8px; }

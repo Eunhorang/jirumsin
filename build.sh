@@ -13,7 +13,7 @@ script() {
   echo '<script>'
   echo '(() => {'
   echo '"use strict";'
-  cat src/data-items.js src/data-cats.js src/engine.js src/render.js src/ai.js src/app.js
+  cat src/data-items.js src/data-cats.js src/engine.js src/render.js src/ai.js src/card.js src/app.js
   echo '})();'
   echo '</script>'
 }

@@ -90,3 +90,16 @@
 </main>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <p class="sr-only" id="sr-say" aria-live="polite"></p>
+<dialog class="card-dialog" id="card-dialog" aria-labelledby="card-title">
+  <div class="card-box">
+    <h2 id="card-title">영수증 이미지</h2>
+    <img id="card-img" alt="">
+    <p class="hint">공유나 저장이 안 되면 이미지를 길게 누르거나(휴대폰) 오른쪽 클릭해서(컴퓨터) 저장하세요.</p>
+    <p class="card-msg" id="card-msg" role="status"></p>
+    <div class="card-btns">
+      <button class="btn btn-primary" type="button" id="card-share">공유하기</button>
+      <button class="btn" type="button" id="card-save">이미지 저장</button>
+      <button class="btn btn-ghost" type="button" id="card-close">닫기</button>
+    </div>
+  </div>
+</dialog>

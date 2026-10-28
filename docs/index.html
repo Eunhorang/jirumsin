@@ -557,6 +557,17 @@ input::placeholder, textarea::placeholder { color: var(--ink-3); opacity: 1; }
 .buy-panel h3 { font-family: var(--font-display); font-weight: 400; font-size: var(--t-xl); }
 .input[aria-invalid="true"] { border-color: var(--red); }
 .actions.is-static { position: static; }
+
+/* ── 영수증 이미지 ─────────────────────── */
+.card-dialog { border: 0; padding: 0; background: transparent; color: var(--ink); width: min(480px, calc(100vw - 32px)); max-height: calc(100vh - 32px); overflow: auto; }
+.card-dialog::backdrop { background: rgba(10, 12, 16, .62); }
+.card-box { background: var(--paper); border-radius: var(--r-md); box-shadow: var(--shadow); padding: 18px; display: grid; gap: 12px; }
+.card-box h2 { font-family: var(--font-display); font-weight: 400; font-size: var(--t-xl); }
+.card-box img { display: block; width: 100%; height: auto; max-height: 58vh; object-fit: contain; border-radius: var(--r-sm); background: var(--paper-2); }
+.card-msg { font-size: var(--t-sm); font-weight: 600; }
+.card-msg:empty { display: none; }
+.card-btns { display: flex; flex-wrap: wrap; gap: 8px; }
+.card-btns .btn { flex: 1 1 auto; }
 /* 휴대폰: 결정 바를 두 줄로 줄여 화면을 덜 가린다 */
 @media (max-width: 560px) {
   .actions { gap: 6px; padding: 8px; }
@@ -665,6 +676,19 @@ input::placeholder, textarea::placeholder { color: var(--ink-3); opacity: 1; }
 </main>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <p class="sr-only" id="sr-say" aria-live="polite"></p>
+<dialog class="card-dialog" id="card-dialog" aria-labelledby="card-title">
+  <div class="card-box">
+    <h2 id="card-title">영수증 이미지</h2>
+    <img id="card-img" alt="">
+    <p class="hint">공유나 저장이 안 되면 이미지를 길게 누르거나(휴대폰) 오른쪽 클릭해서(컴퓨터) 저장하세요.</p>
+    <p class="card-msg" id="card-msg" role="status"></p>
+    <div class="card-btns">
+      <button class="btn btn-primary" type="button" id="card-share">공유하기</button>
+      <button class="btn" type="button" id="card-save">이미지 저장</button>
+      <button class="btn btn-ghost" type="button" id="card-close">닫기</button>
+    </div>
+  </div>
+</dialog>
 <script>
 (() => {
 "use strict";
@@ -1315,14 +1339,17 @@ function drawCrowd(a, animate) {
   crowdAnim = requestAnimationFrame(step);
 }
 
-function barcode(seed) {
-  const r = mulberry32(hash(seed));
-  let x = 0, bars = '';
-  while (x < 296) {
+function barcodeBars(seed) {
+  const r = mulberry32(hash(seed)), bars = [];
+  for (let x = 0; x < 296;) {
     const w = 1 + Math.floor(r() * 3);
-    if (r() > .42) bars += `<rect x="${x}" y="0" width="${w}" height="46"/>`;
+    if (r() > .42) bars.push([x, w]);
     x += w + 1;
   }
+  return bars;
+}
+function barcode(seed) {
+  const bars = barcodeBars(seed).map(([x, w]) => `<rect x="${x}" y="0" width="${w}" height="46"/>`).join('');
   return `<svg viewBox="0 0 300 46" preserveAspectRatio="none" aria-hidden="true" fill="currentColor">${bars}</svg>`;
 }
 function swapTiles(amount) {
@@ -1341,46 +1368,66 @@ function swapHTML(amount, head) {
     <div class="swap">${tiles.map(t => `<div><b class="num">${comma(t.c)}<small>${esc(t.u)}</small></b><span>${esc(t.n)}</span></div>`).join('')}</div>
     <p class="swap-note">2026년 대략적인 가격 기준이에요.</p></div>`;
 }
-function renderReceipt(a) {
-  const m = a.money, c = a.cost, now = new Date();
-  const when = `${now.getFullYear()}.${pad(now.getMonth() + 1)}.${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
-  const line = (l, v, cls = '') => `<div class="rc-line ${cls}"><span class="l">${esc(l)}</span><span class="d"></span><span class="v">${esc(v)}</span></div>`;
-  const sub = t => `<div class="rc-sub">${esc(t)}</div>`;
-  const rule = '<hr class="rc-rule">', dbl = '<hr class="rc-rule double">';
-  const priceNote = a.priceSource === 'user' ? '' : sub(a.priceSource === 'ai' ? 'Claude가 추정한 보통 가격이에요' : '입력이 없어 보통 가격으로 계산했어요');
-  let body = `<div class="rc-item">품목 · ${esc(a.name)}</div>${rule}`;
+const receiptNo = a => String(hash(a.name)).slice(-6);
+function nowStamp() {
+  const now = new Date();
+  return `${now.getFullYear()}.${pad(now.getMonth() + 1)}.${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+}
+/* 결제 전 영수증의 줄 목록. 화면(renderReceipt)과 공유 이미지(card.js)가 함께 쓴다.
+   ['line', 이름, 값, 꾸밈] · ['sub', 설명] · ['rule'] · ['dbl'] · ['ctl'](화면에만 있는 이용 횟수 조절) */
+function receiptRows(a) {
+  const m = a.money, c = a.cost, rows = [];
+  const line = (l, v, cls = '') => rows.push(['line', l, v, cls]);
+  const sub = t => rows.push(['sub', t]);
+  const rule = () => rows.push(['rule']), dbl = () => rows.push(['dbl']);
+  const priceNote = () => { if (a.priceSource !== 'user') sub(a.priceSource === 'ai' ? 'Claude가 추정한 보통 가격이에요' : '입력이 없어 보통 가격으로 계산했어요'); };
   if (a.type === 'sub') {
-    body += line('월 요금', comma(m.M)) + priceNote + line('1년', comma(m.y1)) + line('5년', comma(m.y5)) + line('10년', comma(m.y10)) + rule
-      + `<label class="rc-ctl" for="uses-m">한 달에 몇 번 쓰나요? <b id="uses-m-out">${m.usesM}번</b><input type="range" id="uses-m" min="1" max="30" value="${Math.min(30, m.usesM)}"></label>`
-      + line(`이용 1회당 (월 ${m.usesM}회)`, comma(m.perUse)) + line('1년 치 노동 시간', hm(m.hours))
-      + line('10년 동안 대신 모으면', comma(m.fvSub)) + sub('매달 같은 돈을 연 5%로 모았을 때') + dbl
-      + line('10년 총 구독료', comma(m.y10), 'grand');
+    line('월 요금', comma(m.M)); priceNote(); line('1년', comma(m.y1)); line('5년', comma(m.y5)); line('10년', comma(m.y10)); rule();
+    rows.push(['ctl']);
+    line(`이용 1회당 (월 ${m.usesM}회)`, comma(m.perUse)); line('1년 치 노동 시간', hm(m.hours));
+    line('10년 동안 대신 모으면', comma(m.fvSub)); sub('매달 같은 돈을 연 5%로 모았을 때'); dbl();
+    line('10년 총 구독료', comma(m.y10), 'grand');
   } else if (a.type === 'invest') {
-    body += line('투자 금액', comma(m.A)) + priceNote
-      + line(`과거 최대 하락 (-${Math.round(m.mdd * 100)}%)`, '-' + comma(m.A * m.mdd), 'minus') + (c.mddNote ? sub(c.mddNote) : '') + dbl
-      + line('최악의 경우 평가액', comma(m.after), 'grand')
-      + line('원금 회복에 필요한 상승', '+' + comma(m.recover) + '%')
-      + line(`왕복 거래 비용 (약 ${Math.round(c.fee * 1000) / 10}%)`, comma(m.feeAmt))
-      + line('노동 시간', hm(m.hours)) + rule + sub('투자 권유가 아닌 위험 점검표예요');
+    line('투자 금액', comma(m.A)); priceNote();
+    line(`과거 최대 하락 (-${Math.round(m.mdd * 100)}%)`, '-' + comma(m.A * m.mdd), 'minus'); if (c.mddNote) sub(c.mddNote); dbl();
+    line('최악의 경우 평가액', comma(m.after), 'grand');
+    line('원금 회복에 필요한 상승', '+' + comma(m.recover) + '%');
+    line(`왕복 거래 비용 (약 ${Math.round(c.fee * 1000) / 10}%)`, comma(m.feeAmt));
+    line('노동 시간', hm(m.hours)); rule(); sub('투자 권유가 아닌 위험 점검표예요');
   } else {
-    const hiddenRows = c.hiddenList ? c.hiddenList.map(h => sub(`${h.t} ${comma(h.v)}`)).join('') : (c.hiddenT ? sub(c.hiddenT) : '');
-    body += line('판매가', comma(m.P)) + priceNote;
-    if (m.hiddenTotal > 0) body += line(`숨은 비용 (${a.type === 'exp' ? '함께 드는 돈' : m.life + '년'})`, '+' + comma(m.hiddenTotal), 'plus') + hiddenRows;
-    body += rule + line('총비용', comma(m.tco), 'total');
-    if (m.resaleEnd > 0) body += line(`${m.life}년 뒤 되팔면`, '-' + comma(m.resaleEnd), 'minus');
-    body += dbl + line('실제로 사라지는 돈', comma(m.gone), 'grand');
-    if (c.per === 'day') body += line(`하루당 (${m.life}년)`, comma(m.perDay));
-    else if (a.type !== 'exp') body += line(`1회 사용당 (연 ${c.uses}회)`, comma(m.perUse));
-    body += rule + line(`노동 시간 (시급 ${comma(m.wage)})`, hm(m.hours)) + line('10년 뒤 이 돈 (연 5%)', comma(m.fv10));
+    line('판매가', comma(m.P)); priceNote();
+    if (m.hiddenTotal > 0) {
+      line(`숨은 비용 (${a.type === 'exp' ? '함께 드는 돈' : m.life + '년'})`, '+' + comma(m.hiddenTotal), 'plus');
+      if (c.hiddenList) c.hiddenList.forEach(h => sub(`${h.t} ${comma(h.v)}`)); else if (c.hiddenT) sub(c.hiddenT);
+    }
+    rule(); line('총비용', comma(m.tco), 'total');
+    if (m.resaleEnd > 0) line(`${m.life}년 뒤 되팔면`, '-' + comma(m.resaleEnd), 'minus');
+    dbl(); line('실제로 사라지는 돈', comma(m.gone), 'grand');
+    if (c.per === 'day') line(`하루당 (${m.life}년)`, comma(m.perDay));
+    else if (a.type !== 'exp') line(`1회 사용당 (연 ${c.uses}회)`, comma(m.perUse));
+    rule(); line(`노동 시간 (시급 ${comma(m.wage)})`, hm(m.hours)); line('10년 뒤 이 돈 (연 5%)', comma(m.fv10));
   }
+  return rows;
+}
+function renderReceipt(a) {
+  const m = a.money;
+  const html = {
+    line: (l, v, cls = '') => `<div class="rc-line ${cls}"><span class="l">${esc(l)}</span><span class="d"></span><span class="v">${esc(v)}</span></div>`,
+    sub: t => `<div class="rc-sub">${esc(t)}</div>`,
+    rule: () => '<hr class="rc-rule">',
+    dbl: () => '<hr class="rc-rule double">',
+    ctl: () => `<label class="rc-ctl" for="uses-m">한 달에 몇 번 쓰나요? <b id="uses-m-out">${m.usesM}번</b><input type="range" id="uses-m" min="1" max="30" value="${Math.min(30, m.usesM)}"></label>`,
+  };
+  const body = receiptRows(a).map(([k, ...x]) => html[k](...x)).join('');
   $('#sec-receipt').innerHTML = `
     <div class="receipt">
       <p class="rc-title">결제 전 영수증</p>
-      <p class="rc-meta">지름신 퇴치소 · No.${String(hash(a.name)).slice(-6)} · ${when}</p>
-      ${rule}${body}
+      <p class="rc-meta">지름신 퇴치소 · No.${receiptNo(a)} · ${nowStamp()}</p>
+      <hr class="rc-rule"><div class="rc-item">품목 · ${esc(a.name)}</div><hr class="rc-rule">${body}
       <div class="barcode">${barcode(a.name)}</div>
       <p class="rc-foot">이 영수증은 결제되지 않았습니다.<br>참으면 ${krw(saveAmount(a))}을 지켜요.</p>
     </div>
+    <button class="btn rc-share" type="button" data-act="card">영수증 이미지로 저장·공유</button>
     ${swapHTML(a.type === 'sub' ? m.y1 : m.base, a.type === 'sub' ? '1년 구독료면' : '이 돈이면')}`;
   const r = $('#uses-m');
   if (r) r.addEventListener('input', () => {
@@ -1497,6 +1544,7 @@ function summaryText(a) {
     `사실 원하는 것: ${a.want}`,
     ...a.reasons.map((r, i) => `${i + 1}. ${r.t}`),
     `참으면 ${krw(saveAmount(a))}을 지켜요.`,
+    `나도 해 보기: ${APP_URL}`,
   ].join('\n');
 }
 
@@ -1765,6 +1813,215 @@ async function sendChat(a) {
     const b = $('#chat-go');
     if (b) b.disabled = false;
   }
+}
+
+/* ── 영수증 이미지 ─────────────────────────
+   SNS에 올리기 좋게 결제 전 영수증을 폭 1080px 그림으로 그린다. 화면의 밝은·어두운 모드와 상관없이 늘 같은 색으로 그린다.
+   claude.ai 안에서는 downloads 기능으로 저장하고, 그 밖에서는 일반 다운로드와 휴대폰 공유 시트를 쓴다. */
+const APP_URL = 'https://eunhorang.github.io/jirumsin/';
+const CARD_C = { bg: '#F2D04B', paper: '#FFFFFF', ink: '#1A1D24', ink2: '#4C5361', ink3: '#5F6673', red: '#C42A20', mark: '#FFE36B' };
+const CARD_F = {
+  mono: '"Nanum Gothic Coding", ui-monospace, Menlo, monospace',
+  display: '"Black Han Sans", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif',
+  body: '"IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif',
+};
+const cardDownloads = window.claude && typeof window.claude.use === 'function'
+  ? Promise.resolve(window.claude.use('downloads')).catch(() => null) : Promise.resolve(null);
+const card = { file: null, url: '', text: '', busy: false };
+
+// 그릴 글자가 든 글꼴 조각(한글 글꼴은 여러 조각으로 나뉘어 있다)을 미리 불러온다. 늦으면 기본 글꼴로 그린다.
+function cardFonts(text) {
+  if (!document.fonts || !document.fonts.load) return Promise.resolve();
+  const want = [`400 52px ${CARD_F.display}`, `400 28px ${CARD_F.mono}`, `700 28px ${CARD_F.mono}`, `700 34px ${CARD_F.body}`, `500 30px ${CARD_F.body}`];
+  return Promise.race([
+    Promise.all(want.map(f => document.fonts.load(f, text))).catch(() => null),
+    new Promise(r => setTimeout(r, 4000)),
+  ]);
+}
+function rrect(g, x, y, w, h, r) {
+  g.beginPath(); g.moveTo(x + r, y);
+  g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r);
+  g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath();
+}
+// 폭에 맞춰 줄을 나눈다(띄어쓰기에서 먼저 끊는다). max줄을 넘으면 말줄임표로 끝낸다.
+function wrapText(g, text, maxW, max) {
+  const lines = [];
+  let cur = '';
+  for (const ch of String(text)) {
+    if (cur && g.measureText(cur + ch).width > maxW) {
+      const cut = cur.lastIndexOf(' ');
+      if (cut > 0 && ch !== ' ') { lines.push(cur.slice(0, cut)); cur = cur.slice(cut + 1) + ch; }
+      else { lines.push(cur.trimEnd()); cur = ch === ' ' ? '' : ch; }
+    } else cur += ch;
+  }
+  if (cur.trim()) lines.push(cur.trim());
+  if (lines.length > max) {
+    lines.length = max;
+    let l = lines[max - 1];
+    while (l && g.measureText(l + '…').width > maxW) l = l.slice(0, -1);
+    lines[max - 1] = l + '…';
+  }
+  return lines;
+}
+
+async function makeCard(a) {
+  const C = CARD_C, F = CARD_F, W = 1080, PX = 96, PW = 888, IX = PX + 56, IW = PW - 112, TOP = 188;
+  const rows = receiptRows(a).filter(r => r[0] !== 'ctl'), o = a.own, stamp = a.level.stamp.split('\n');
+  const tiles = swapTiles(a.type === 'sub' ? a.money.y1 : a.money.base);
+  const t = {
+    meta: `지름신 퇴치소 · No.${receiptNo(a)} · ${nowStamp()}`,
+    item: `품목 · ${a.name}`,
+    foot: `참으면 ${krw(saveAmount(a))}을 지켜요.`,
+    own: `전 세계에서 ${oneIn(o.pct)}${o.pct < 50 ? '만' : '이'} ${ownVerbShort(a.type)} ${o.ref || a.name}`,
+    swap: tiles.length ? `${a.type === 'sub' ? '1년 구독료면' : '이 돈이면'} ${tiles[0].n} ${comma(tiles[0].c)}${tiles[0].u}` : '',
+    url: APP_URL.replace(/^https:\/\//, '').replace(/\/$/, ''),
+  };
+  await cardFonts(['지름신 퇴치소 결제 전 영수증 이 영수증은 결제되지 않았습니다. 나도 지름신 퇴치하기…', ...stamp, ...Object.values(t), ...rows.flat()].join(''));
+
+  const cv = document.createElement('canvas'), g = cv.getContext('2d');
+  cv.width = W; cv.height = 2800;
+  const font = (w, px, fam) => { g.font = `${w} ${px}px ${fam}`; };
+  const put = (s, x, y, align = 'left', color = C.ink) => { g.fillStyle = color; g.textAlign = align; g.fillText(s, x, y); };
+  const spaced = (s, cx, y, gap) => {
+    const chars = [...s], ws = chars.map(ch => g.measureText(ch).width);
+    let x = cx - (ws.reduce((p, q) => p + q, 0) + gap * (chars.length - 1)) / 2;
+    chars.forEach((ch, i) => { put(ch, x, y); x += ws[i] + gap; });
+  };
+  g.fillStyle = C.bg; g.fillRect(0, 0, W, cv.height);
+
+  // 머리: 앱의 도장 로고와 이름
+  g.save(); g.translate(PX + 36, 100); g.rotate(-5 * Math.PI / 180);
+  rrect(g, -36, -36, 72, 72, 8); g.fillStyle = C.red; g.fill();
+  rrect(g, -29, -29, 58, 58, 5); g.strokeStyle = '#fff'; g.lineWidth = 2.5; g.stroke();
+  font(400, 24, F.display); put('퇴', 0, -3, 'center', '#fff'); put('치', 0, 23, 'center', '#fff');
+  g.restore();
+  font(400, 50, F.display); put('지름신 퇴치소', PX + 96, 118);
+
+  // 영수증 내용은 [높이, 그리기] 목록으로 먼저 만들고, 전체 높이를 안 뒤에 종이를 깐다
+  const items = [], add = (h, draw) => items.push([h, draw]);
+  const dash = y => { g.save(); g.strokeStyle = C.ink3; g.lineWidth = 2; g.setLineDash([7, 7]); g.beginPath(); g.moveTo(IX, y); g.lineTo(IX + IW, y); g.stroke(); g.restore(); };
+  const dbl = y => { g.fillStyle = C.ink; g.fillRect(IX, y - 4, IW, 2); g.fillRect(IX, y + 2, IW, 2); };
+  const row = (y, l, v, cls) => {
+    const grand = cls === 'grand', weight = grand || cls === 'total' ? 700 : 400;
+    let px = grand ? 31 : 27;
+    font(weight, px, F.mono);
+    while (px > 18 && g.measureText(l).width + g.measureText(v).width + 40 > IW) font(weight, px -= 2, F.mono);
+    const base = y + (grand ? 38 : 32), lw = g.measureText(l).width, vw = g.measureText(v).width;
+    if (grand) { g.fillStyle = C.mark; g.fillRect(IX + IW - vw - 10, base - px, vw + 20, px + 12); }
+    put(l, IX, base);
+    put(v, IX + IW, base, 'right', cls === 'minus' ? C.red : cls === 'plus' ? C.ink2 : C.ink);
+    const from = IX + lw + 12, to = IX + IW - vw - (grand ? 22 : 12);
+    if (to - from > 14) {
+      g.save(); g.strokeStyle = C.ink3; g.globalAlpha = .5; g.lineWidth = 2; g.setLineDash([2, 6]);
+      g.beginPath(); g.moveTo(from, base - 6); g.lineTo(to, base - 6); g.stroke(); g.restore();
+    }
+  };
+  add(58, y => { font(700, 38, F.mono); spaced('결제 전 영수증', W / 2, y + 42, 10); });
+  add(38, y => { font(400, 21, F.mono); put(t.meta, W / 2, y + 26, 'center', C.ink3); });
+  add(26, y => dash(y + 13));
+  font(700, 28, F.mono);
+  for (const l of wrapText(g, t.item, IW, 2)) add(42, y => { font(700, 28, F.mono); put(l, IX, y + 31); });
+  add(26, y => dash(y + 13));
+  for (const [k, l, v, cls] of rows) {
+    if (k === 'rule') add(26, y => dash(y + 13));
+    else if (k === 'dbl') add(30, y => dbl(y + 15));
+    else if (k === 'sub') {
+      font(400, 21, F.mono);
+      for (const s of wrapText(g, l, IW - 28, 3)) add(32, y => { font(400, 21, F.mono); put(s, IX + 28, y + 23, 'left', C.ink3); });
+    } else add(cls === 'grand' ? 54 : 44, y => row(y, l, v, cls));
+  }
+  add(22, () => {});
+  add(84, y => { g.fillStyle = C.ink; const s = IW / 300; for (const [x, w] of barcodeBars(a.name)) g.fillRect(IX + x * s, y, w * s, 84); });
+  add(18, () => {});
+  add(32, y => { font(400, 21, F.mono); put('이 영수증은 결제되지 않았습니다.', W / 2, y + 24, 'center', C.ink3); });
+  add(40, y => { font(700, 27, F.mono); put(t.foot, W / 2, y + 31, 'center', C.red); });
+
+  // 종이와 아래쪽 톱니
+  const padT = 48, padB = 44, paperH = padT + items.reduce((s, [h]) => s + h, 0) + padB, teeth = 37, step = PW / teeth;
+  g.save();
+  g.shadowColor = 'rgba(42, 23, 8, .22)'; g.shadowBlur = 28; g.shadowOffsetY = 10;
+  g.beginPath(); g.moveTo(PX, TOP); g.lineTo(PX + PW, TOP); g.lineTo(PX + PW, TOP + paperH);
+  for (let i = teeth; i > 0; i--) { g.lineTo(PX + (i - .5) * step, TOP + paperH + 14); g.lineTo(PX + (i - 1) * step, TOP + paperH); }
+  g.closePath(); g.fillStyle = C.paper; g.fill();
+  g.restore();
+  let y = TOP + padT;
+  for (const [h, draw] of items) { draw(y); y += h; }
+
+  // 판정 도장: 영수증 오른쪽 위 모서리에 걸쳐 찍는다
+  g.save(); g.translate(PX + PW - 130, TOP - 6); g.rotate(-10 * Math.PI / 180);
+  g.globalCompositeOperation = 'multiply'; g.globalAlpha = .92;
+  font(400, 52, F.display);
+  const sw = Math.max(...stamp.map(s => g.measureText(s).width)) + 60, sh = stamp.length * 56 + 40;
+  g.strokeStyle = C.red; g.lineWidth = 7; rrect(g, -sw / 2, -sh / 2, sw, sh, 14); g.stroke();
+  g.lineWidth = 2.5; rrect(g, -sw / 2 + 10, -sh / 2 + 10, sw - 20, sh - 20, 8); g.stroke();
+  stamp.forEach((s, i) => put(s, 0, -sh / 2 + 66 + i * 56, 'center', C.red));
+  g.restore();
+
+  // 아래: 세계 보유율, 이 돈이면, 앱 주소
+  y = TOP + paperH + 14 + 58;
+  font(700, 34, F.body);
+  for (const l of wrapText(g, t.own, PW, 2)) { put(l, W / 2, y + 36, 'center'); y += 48; }
+  if (t.swap) { font(500, 29, F.body); put(t.swap, W / 2, y + 34, 'center', C.ink2); y += 46; }
+  y += 36;
+  font(400, 40, F.display); put('나도 지름신 퇴치하기', W / 2, y + 42, 'center'); y += 56;
+  font(700, 25, F.mono); put(t.url, W / 2, y + 30, 'center', C.ink2); y += 42;
+
+  const out = document.createElement('canvas');
+  out.width = W; out.height = Math.ceil(y + 56);
+  out.getContext('2d').drawImage(cv, 0, 0);
+  return new Promise((res, rej) => out.toBlob(b => (b ? res(b) : rej(new Error('toBlob'))), 'image/png'));
+}
+
+async function openCard(a, btn) {
+  if (card.busy) return;
+  card.busy = true;
+  const label = btn.textContent;
+  btn.textContent = '이미지를 만드는 중…'; btn.setAttribute('aria-busy', 'true');
+  try {
+    const blob = await makeCard(a);
+    const safe = a.name.replace(/[\\/:*?"<>|\s]+/g, ' ').trim().slice(0, 40) || '분석';
+    card.file = new File([blob], `지름신 영수증 ${safe}.png`, { type: 'image/png' });
+    if (card.url) URL.revokeObjectURL(card.url);
+    card.url = URL.createObjectURL(blob);
+    card.text = `[지름신 퇴치소] ${a.name}: ${a.level.head}\n나도 해 보기 ${APP_URL}`;
+    const grand = receiptRows(a).find(r => r[3] === 'grand'), img = $('#card-img');
+    img.src = card.url;
+    img.alt = `${a.name} 결제 전 영수증 그림. 판정 ${a.level.stamp.replace('\n', ' ')}${grand ? `, ${grand[1]} ${grand[2]}` : ''}.`;
+    $('#card-share').hidden = !(navigator.canShare && navigator.canShare({ files: [card.file] }));
+    $('#card-msg').textContent = '';
+    $('#card-dialog').showModal();
+  } catch (e) {
+    toast('이미지를 만들지 못했어요. 잠시 뒤에 다시 해 주세요.');
+  } finally {
+    card.busy = false;
+    btn.textContent = label; btn.removeAttribute('aria-busy');
+  }
+}
+function initCard() {
+  const dlg = $('#card-dialog'), msg = $('#card-msg');
+  $('#card-close').addEventListener('click', () => dlg.close());
+  dlg.addEventListener('click', ev => { if (ev.target === dlg) dlg.close(); });
+  // 공유 시트는 누른 순간에만 열 수 있어서, 기다리는 일 없이 바로 부른다
+  $('#card-share').addEventListener('click', () => {
+    navigator.share({ files: [card.file], title: '지름신 퇴치소', text: card.text })
+      .catch(e => { if (!e || e.name !== 'AbortError') msg.textContent = '여기서는 바로 공유할 수 없어요. 이미지를 저장해서 올려 주세요.'; });
+  });
+  $('#card-save').addEventListener('click', async () => {
+    const dl = await cardDownloads;
+    if (dl) {
+      try {
+        const r = await dl.save({ filename: card.file.name, data: card.file });
+        if (r && r.status === 'saved') msg.textContent = '이미지를 저장했어요.';
+      } catch (e) {
+        const code = e && e.code;
+        if (code !== 'declined') msg.textContent = code === 'rate_limited' ? '저장 창이 이미 열려 있어요. 잠시 뒤에 다시 눌러 주세요.' : '여기서는 저장할 수 없어요. 이미지를 길게 누르거나 오른쪽 클릭해서 저장해 주세요.';
+      }
+      return;
+    }
+    const link = document.createElement('a');
+    link.href = card.url; link.download = card.file.name;
+    document.body.appendChild(link); link.click(); link.remove();
+  });
 }
 
 /* ── 기록 저장 (이 브라우저에만) ─────────── */
@@ -2131,6 +2388,7 @@ function start() {
       saveState();
       settle(null, '결정을 되돌렸어요.');
     } else if (act === 'copy') copyText(summaryText(a));
+    else if (act === 'card') openCard(a, b);
     else if (act === 'stop') { if (ai.ctl) ai.ctl.abort(); }
     else if (act === 'retry') runAI(a);
   });
@@ -2164,6 +2422,7 @@ function start() {
 
   syncTypeUI();
   initAI();
+  initCard();
   const ex = EXAMPLES[0];
   analyze({ item: ex.item, price: ex.price, type: 'auto', reasons: ex.reasons, since: ex.since, similar: !!ex.similar, wage: WAGE_MIN }, { example: true });
   updateBadges();

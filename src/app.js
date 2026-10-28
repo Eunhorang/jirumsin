@@ -363,6 +363,7 @@ function start() {
       saveState();
       settle(null, '결정을 되돌렸어요.');
     } else if (act === 'copy') copyText(summaryText(a));
+    else if (act === 'card') openCard(a, b);
     else if (act === 'stop') { if (ai.ctl) ai.ctl.abort(); }
     else if (act === 'retry') runAI(a);
   });
@@ -396,6 +397,7 @@ function start() {
 
   syncTypeUI();
   initAI();
+  initCard();
   const ex = EXAMPLES[0];
   analyze({ item: ex.item, price: ex.price, type: 'auto', reasons: ex.reasons, since: ex.since, similar: !!ex.similar, wage: WAGE_MIN }, { example: true });
   updateBadges();

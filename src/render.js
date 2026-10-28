@@ -130,14 +130,17 @@ function drawCrowd(a, animate) {
   crowdAnim = requestAnimationFrame(step);
 }
 
-function barcode(seed) {
-  const r = mulberry32(hash(seed));
-  let x = 0, bars = '';
-  while (x < 296) {
+function barcodeBars(seed) {
+  const r = mulberry32(hash(seed)), bars = [];
+  for (let x = 0; x < 296;) {
     const w = 1 + Math.floor(r() * 3);
-    if (r() > .42) bars += `<rect x="${x}" y="0" width="${w}" height="46"/>`;
+    if (r() > .42) bars.push([x, w]);
     x += w + 1;
   }
+  return bars;
+}
+function barcode(seed) {
+  const bars = barcodeBars(seed).map(([x, w]) => `<rect x="${x}" y="0" width="${w}" height="46"/>`).join('');
   return `<svg viewBox="0 0 300 46" preserveAspectRatio="none" aria-hidden="true" fill="currentColor">${bars}</svg>`;
 }
 function swapTiles(amount) {
@@ -156,46 +159,66 @@ function swapHTML(amount, head) {
     <div class="swap">${tiles.map(t => `<div><b class="num">${comma(t.c)}<small>${esc(t.u)}</small></b><span>${esc(t.n)}</span></div>`).join('')}</div>
     <p class="swap-note">2026년 대략적인 가격 기준이에요.</p></div>`;
 }
-function renderReceipt(a) {
-  const m = a.money, c = a.cost, now = new Date();
-  const when = `${now.getFullYear()}.${pad(now.getMonth() + 1)}.${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
-  const line = (l, v, cls = '') => `<div class="rc-line ${cls}"><span class="l">${esc(l)}</span><span class="d"></span><span class="v">${esc(v)}</span></div>`;
-  const sub = t => `<div class="rc-sub">${esc(t)}</div>`;
-  const rule = '<hr class="rc-rule">', dbl = '<hr class="rc-rule double">';
-  const priceNote = a.priceSource === 'user' ? '' : sub(a.priceSource === 'ai' ? 'Claude가 추정한 보통 가격이에요' : '입력이 없어 보통 가격으로 계산했어요');
-  let body = `<div class="rc-item">품목 · ${esc(a.name)}</div>${rule}`;
+const receiptNo = a => String(hash(a.name)).slice(-6);
+function nowStamp() {
+  const now = new Date();
+  return `${now.getFullYear()}.${pad(now.getMonth() + 1)}.${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+}
+/* 결제 전 영수증의 줄 목록. 화면(renderReceipt)과 공유 이미지(card.js)가 함께 쓴다.
+   ['line', 이름, 값, 꾸밈] · ['sub', 설명] · ['rule'] · ['dbl'] · ['ctl'](화면에만 있는 이용 횟수 조절) */
+function receiptRows(a) {
+  const m = a.money, c = a.cost, rows = [];
+  const line = (l, v, cls = '') => rows.push(['line', l, v, cls]);
+  const sub = t => rows.push(['sub', t]);
+  const rule = () => rows.push(['rule']), dbl = () => rows.push(['dbl']);
+  const priceNote = () => { if (a.priceSource !== 'user') sub(a.priceSource === 'ai' ? 'Claude가 추정한 보통 가격이에요' : '입력이 없어 보통 가격으로 계산했어요'); };
   if (a.type === 'sub') {
-    body += line('월 요금', comma(m.M)) + priceNote + line('1년', comma(m.y1)) + line('5년', comma(m.y5)) + line('10년', comma(m.y10)) + rule
-      + `<label class="rc-ctl" for="uses-m">한 달에 몇 번 쓰나요? <b id="uses-m-out">${m.usesM}번</b><input type="range" id="uses-m" min="1" max="30" value="${Math.min(30, m.usesM)}"></label>`
-      + line(`이용 1회당 (월 ${m.usesM}회)`, comma(m.perUse)) + line('1년 치 노동 시간', hm(m.hours))
-      + line('10년 동안 대신 모으면', comma(m.fvSub)) + sub('매달 같은 돈을 연 5%로 모았을 때') + dbl
-      + line('10년 총 구독료', comma(m.y10), 'grand');
+    line('월 요금', comma(m.M)); priceNote(); line('1년', comma(m.y1)); line('5년', comma(m.y5)); line('10년', comma(m.y10)); rule();
+    rows.push(['ctl']);
+    line(`이용 1회당 (월 ${m.usesM}회)`, comma(m.perUse)); line('1년 치 노동 시간', hm(m.hours));
+    line('10년 동안 대신 모으면', comma(m.fvSub)); sub('매달 같은 돈을 연 5%로 모았을 때'); dbl();
+    line('10년 총 구독료', comma(m.y10), 'grand');
   } else if (a.type === 'invest') {
-    body += line('투자 금액', comma(m.A)) + priceNote
-      + line(`과거 최대 하락 (-${Math.round(m.mdd * 100)}%)`, '-' + comma(m.A * m.mdd), 'minus') + (c.mddNote ? sub(c.mddNote) : '') + dbl
-      + line('최악의 경우 평가액', comma(m.after), 'grand')
-      + line('원금 회복에 필요한 상승', '+' + comma(m.recover) + '%')
-      + line(`왕복 거래 비용 (약 ${Math.round(c.fee * 1000) / 10}%)`, comma(m.feeAmt))
-      + line('노동 시간', hm(m.hours)) + rule + sub('투자 권유가 아닌 위험 점검표예요');
+    line('투자 금액', comma(m.A)); priceNote();
+    line(`과거 최대 하락 (-${Math.round(m.mdd * 100)}%)`, '-' + comma(m.A * m.mdd), 'minus'); if (c.mddNote) sub(c.mddNote); dbl();
+    line('최악의 경우 평가액', comma(m.after), 'grand');
+    line('원금 회복에 필요한 상승', '+' + comma(m.recover) + '%');
+    line(`왕복 거래 비용 (약 ${Math.round(c.fee * 1000) / 10}%)`, comma(m.feeAmt));
+    line('노동 시간', hm(m.hours)); rule(); sub('투자 권유가 아닌 위험 점검표예요');
   } else {
-    const hiddenRows = c.hiddenList ? c.hiddenList.map(h => sub(`${h.t} ${comma(h.v)}`)).join('') : (c.hiddenT ? sub(c.hiddenT) : '');
-    body += line('판매가', comma(m.P)) + priceNote;
-    if (m.hiddenTotal > 0) body += line(`숨은 비용 (${a.type === 'exp' ? '함께 드는 돈' : m.life + '년'})`, '+' + comma(m.hiddenTotal), 'plus') + hiddenRows;
-    body += rule + line('총비용', comma(m.tco), 'total');
-    if (m.resaleEnd > 0) body += line(`${m.life}년 뒤 되팔면`, '-' + comma(m.resaleEnd), 'minus');
-    body += dbl + line('실제로 사라지는 돈', comma(m.gone), 'grand');
-    if (c.per === 'day') body += line(`하루당 (${m.life}년)`, comma(m.perDay));
-    else if (a.type !== 'exp') body += line(`1회 사용당 (연 ${c.uses}회)`, comma(m.perUse));
-    body += rule + line(`노동 시간 (시급 ${comma(m.wage)})`, hm(m.hours)) + line('10년 뒤 이 돈 (연 5%)', comma(m.fv10));
+    line('판매가', comma(m.P)); priceNote();
+    if (m.hiddenTotal > 0) {
+      line(`숨은 비용 (${a.type === 'exp' ? '함께 드는 돈' : m.life + '년'})`, '+' + comma(m.hiddenTotal), 'plus');
+      if (c.hiddenList) c.hiddenList.forEach(h => sub(`${h.t} ${comma(h.v)}`)); else if (c.hiddenT) sub(c.hiddenT);
+    }
+    rule(); line('총비용', comma(m.tco), 'total');
+    if (m.resaleEnd > 0) line(`${m.life}년 뒤 되팔면`, '-' + comma(m.resaleEnd), 'minus');
+    dbl(); line('실제로 사라지는 돈', comma(m.gone), 'grand');
+    if (c.per === 'day') line(`하루당 (${m.life}년)`, comma(m.perDay));
+    else if (a.type !== 'exp') line(`1회 사용당 (연 ${c.uses}회)`, comma(m.perUse));
+    rule(); line(`노동 시간 (시급 ${comma(m.wage)})`, hm(m.hours)); line('10년 뒤 이 돈 (연 5%)', comma(m.fv10));
   }
+  return rows;
+}
+function renderReceipt(a) {
+  const m = a.money;
+  const html = {
+    line: (l, v, cls = '') => `<div class="rc-line ${cls}"><span class="l">${esc(l)}</span><span class="d"></span><span class="v">${esc(v)}</span></div>`,
+    sub: t => `<div class="rc-sub">${esc(t)}</div>`,
+    rule: () => '<hr class="rc-rule">',
+    dbl: () => '<hr class="rc-rule double">',
+    ctl: () => `<label class="rc-ctl" for="uses-m">한 달에 몇 번 쓰나요? <b id="uses-m-out">${m.usesM}번</b><input type="range" id="uses-m" min="1" max="30" value="${Math.min(30, m.usesM)}"></label>`,
+  };
+  const body = receiptRows(a).map(([k, ...x]) => html[k](...x)).join('');
   $('#sec-receipt').innerHTML = `
     <div class="receipt">
       <p class="rc-title">결제 전 영수증</p>
-      <p class="rc-meta">지름신 퇴치소 · No.${String(hash(a.name)).slice(-6)} · ${when}</p>
-      ${rule}${body}
+      <p class="rc-meta">지름신 퇴치소 · No.${receiptNo(a)} · ${nowStamp()}</p>
+      <hr class="rc-rule"><div class="rc-item">품목 · ${esc(a.name)}</div><hr class="rc-rule">${body}
       <div class="barcode">${barcode(a.name)}</div>
       <p class="rc-foot">이 영수증은 결제되지 않았습니다.<br>참으면 ${krw(saveAmount(a))}을 지켜요.</p>
     </div>
+    <button class="btn rc-share" type="button" data-act="card">영수증 이미지로 저장·공유</button>
     ${swapHTML(a.type === 'sub' ? m.y1 : m.base, a.type === 'sub' ? '1년 구독료면' : '이 돈이면')}`;
   const r = $('#uses-m');
   if (r) r.addEventListener('input', () => {
@@ -312,5 +335,6 @@ function summaryText(a) {
     `사실 원하는 것: ${a.want}`,
     ...a.reasons.map((r, i) => `${i + 1}. ${r.t}`),
     `참으면 ${krw(saveAmount(a))}을 지켜요.`,
+    `나도 해 보기: ${APP_URL}`,
   ].join('\n');
 }
