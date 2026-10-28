@@ -2,7 +2,7 @@
 
 사고 싶은 물건, 구독, 명품·보석, 주식·코인, 여행 같은 경험을 입력하면 충동구매인지 따져 주는 웹앱이에요.
 
-**바로 써 보기: https://eunhorang.github.io/jirumsin/**
+**바로 써 보기: https://jirumsin.com/**
 
 ## 할 수 있는 것
 

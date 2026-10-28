@@ -1821,7 +1821,7 @@ async function sendChat(a) {
 /* ── 영수증 이미지 ─────────────────────────
    SNS에 올리기 좋게 결제 전 영수증을 폭 1080px 그림으로 그린다. 화면의 밝은·어두운 모드와 상관없이 늘 같은 색으로 그린다.
    claude.ai 안에서는 downloads 기능으로 저장하고, 그 밖에서는 일반 다운로드와 휴대폰 공유 시트를 쓴다. */
-const APP_URL = 'http://jirumsin.com/'; // jirumsin.com의 HTTPS 인증서가 나오면 https로 바꾼다
+const APP_URL = 'https://jirumsin.com/';
 const CARD_C = { bg: '#F2D04B', paper: '#FFFFFF', ink: '#1A1D24', ink2: '#4C5361', ink3: '#5F6673', red: '#C42A20', mark: '#FFE36B' };
 const CARD_F = {
   mono: '"Nanum Gothic Coding", ui-monospace, Menlo, monospace',
