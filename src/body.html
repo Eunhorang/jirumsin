@@ -1,0 +1,92 @@
+<header class="top">
+  <div class="wrap top-in">
+    <h1 class="brand-h"><a class="brand" href="#analyze" id="brand"><span class="seal" aria-hidden="true">퇴치</span><span class="brand-name">지름신 퇴치소</span></a></h1>
+    <nav class="tabs" role="tablist" aria-label="화면 선택">
+      <button class="tab" type="button" role="tab" id="tab-analyze" aria-controls="view-analyze" aria-selected="true" data-view="analyze">분석</button>
+      <button class="tab" type="button" role="tab" id="tab-wait" aria-controls="view-wait" aria-selected="false" data-view="wait">보류함 <span class="badge" id="wait-badge"></span></button>
+      <button class="tab" type="button" role="tab" id="tab-jar" aria-controls="view-jar" aria-selected="false" data-view="jar">저금통 <span class="badge save" id="jar-badge"></span></button>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="view" id="view-analyze" role="tabpanel" aria-labelledby="tab-analyze">
+    <div class="intro">
+      <h2>결제 버튼 누르기 전에,<br><em>지름신</em>부터 확인하세요</h2>
+      <p>물건, 구독, 명품, 주식까지. 세계에서 몇 %가 가지고 있는지, 왜 갖고 싶은지, 진짜 얼마인지 따져 드려요.</p>
+    </div>
+
+    <section class="slip" aria-labelledby="slip-title">
+      <div class="slip-head">
+        <h2 id="slip-title">지름 신고서</h2>
+        <p>솔직하게 적을수록 정확해져요.</p>
+      </div>
+      <form class="form" id="form" novalidate>
+        <div class="field">
+          <label for="item">무엇을 사고 싶나요?</label>
+          <input class="input input-item" id="item" name="item" type="text" autocomplete="off" maxlength="60" placeholder="예: 아이폰, 넷플릭스, 롤렉스, 테슬라 주식">
+          <div class="examples" id="examples" role="group" aria-label="예시로 채워 보기"></div>
+        </div>
+        <div class="row">
+          <div class="field">
+            <label for="price" id="price-label">가격</label>
+            <div class="money"><input id="price" name="price" type="text" inputmode="numeric" autocomplete="off" placeholder="모르면 비워 두세요"><span>원</span></div>
+            <p class="hint" id="price-hint">비워 두면 보통 가격으로 계산해요.</p>
+          </div>
+          <fieldset class="field">
+            <legend>종류</legend>
+            <div class="seg" id="type-seg"></div>
+            <p class="hint" id="type-hint"></p>
+          </fieldset>
+        </div>
+        <fieldset class="field">
+          <legend>왜 사고 싶나요? <span class="opt">여러 개 골라도 돼요</span></legend>
+          <div class="chips" id="reasons"></div>
+        </fieldset>
+        <div class="row">
+          <fieldset class="field">
+            <legend>언제부터 갖고 싶었나요?</legend>
+            <div class="seg" id="since-seg"></div>
+          </fieldset>
+          <div class="field">
+            <span class="label">지금 내 상황</span>
+            <label class="check"><input type="checkbox" id="similar"> 비슷한 걸 이미 가지고 있어요</label>
+            <div class="wage"><label for="wage">내 시급</label><span class="money sm"><input id="wage" type="text" inputmode="numeric" autocomplete="off" value="10,320"><span>원</span></span></div>
+            <p class="hint">기본값은 2026년 최저임금이에요. 월급이라면 209로 나눠서 넣으세요.</p>
+          </div>
+        </div>
+        <div class="submit-row">
+          <label class="ai-toggle" id="ai-wrap" hidden><input type="checkbox" id="ai-on" checked><span>Claude 정밀 분석<small>세계 보유율과 구매 심리를 Claude가 한 번 더 추정해요. 내 Claude 사용량이 쓰여요.</small></span></label>
+          <p class="ai-off-note" id="ai-note">기본 추정 모드예요. 앱에 담긴 통계와 계산으로 분석해요.</p>
+          <button class="btn btn-primary" type="submit" id="go">지름신 퇴치하기</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="result" id="result"></section>
+  </section>
+
+  <section class="view panel" id="view-wait" role="tabpanel" aria-labelledby="tab-wait" hidden>
+    <div class="panel-h">
+      <h2 tabindex="-1">보류함</h2>
+      <p>사고 싶은 마음은 시간이 지나면 꽤 식어요. 정해 둔 시간이 지나도 여전히 필요하다면, 그때 사도 늦지 않아요.</p>
+    </div>
+    <div class="cards" id="wait-list"></div>
+  </section>
+
+  <section class="view panel" id="view-jar" role="tabpanel" aria-labelledby="tab-jar" hidden>
+    <div class="panel-h">
+      <h2 tabindex="-1">참은 돈 저금통</h2>
+      <p>사지 않고 참은 금액이 여기에 쌓여요. 진짜 원하는 목표를 정해 두면 참는 게 덜 아까워요.</p>
+    </div>
+    <div class="jar-view" id="jar-view"></div>
+  </section>
+
+  <footer class="foot">
+    <p>보유율·가격·하락폭은 공개 자료와 업계 추정치를 바탕으로 한 대략적인 값이라 실제와 다를 수 있어요.</p>
+    <p>주식·코인 분석은 투자 권유가 아니에요. 충동적인 결정을 막기 위한 위험 점검표예요.</p>
+    <p>보류함과 저금통 기록은 지금 쓰는 브라우저에만 저장돼요.</p>
+  </footer>
+</main>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<p class="sr-only" id="sr-say" aria-live="polite"></p>
