@@ -1,0 +1,16 @@
+{
+  "name": "지름신 퇴치소",
+  "short_name": "지름신 퇴치소",
+  "description": "사고 싶은 물건·구독·명품·주식을 입력하면 세계 보유율, 구매 심리, 진짜 비용을 분석해 충동구매를 막아 주는 앱",
+  "lang": "ko",
+  "start_url": "./",
+  "scope": "./",
+  "display": "browser",
+  "background_color": "#F2D04B",
+  "theme_color": "#E5E8EC",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

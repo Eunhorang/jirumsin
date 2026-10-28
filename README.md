@@ -31,6 +31,7 @@
 | `src/app.js` | 신고서, 결정 바, 보류함, 저금통, 화면 전환, 익명 통계 이벤트(`track`) |
 | `build.sh` | 조각을 합쳐 `index.html`과 `docs/index.html`을 만들어요 |
 | `src/og.html`, `og.sh` | 링크 공유 미리보기 그림 `docs/og.png`(1200×630)의 원본과 찍는 스크립트 |
+| `src/icon.html`, `icon.sh` | 휴대폰 홈 화면 아이콘(`docs/apple-touch-icon.png`, `icon-192.png`, `icon-512.png`)의 원본과 찍는 스크립트. 앱 이름과 아이콘 목록은 `docs/manifest.webmanifest`에 있어요 |
 
 ## 빌드와 미리보기
 
@@ -41,7 +42,7 @@
 - `index.html`: claude.ai 아티팩트 게시용이에요(문서 머리 없이 본문만 있어요).
 - `docs/index.html`: GitHub Pages가 보여 주는 완전한 페이지예요. 로컬에서도 브라우저로 바로 열어 볼 수 있어요.
 
-소스는 `src`에서 고치고, 고친 뒤에는 `build.sh`를 다시 실행해요. 링크 미리보기 그림은 `src/og.html`을 고친 뒤 `./og.sh`로 다시 찍어요(Google Chrome과 인터넷 연결이 필요해요). 다시 찍었으면 `src/web-head.html`의 `og:image` 주소 끝 `?v=` 숫자를 하나 올려 주세요. 카카오톡은 같은 주소의 그림을 오래 기억해서, 주소가 바뀌어야 새 그림을 가져가요. `docs/index.html`이 바뀐 채로 `main`에 올라가면 GitHub Pages도 1~2분 뒤에 새 버전으로 바뀌어요.
+소스는 `src`에서 고치고, 고친 뒤에는 `build.sh`를 다시 실행해요. 링크 미리보기 그림은 `src/og.html`을 고친 뒤 `./og.sh`로 다시 찍어요(Google Chrome과 인터넷 연결이 필요해요). 다시 찍었으면 `src/web-head.html`의 `og:image` 주소 끝 `?v=` 숫자를 하나 올려 주세요. 카카오톡은 같은 주소의 그림을 오래 기억해서, 주소가 바뀌어야 새 그림을 가져가요. 홈 화면 아이콘은 `src/icon.html`을 고친 뒤 `./icon.sh`로 다시 찍어요. `docs/index.html`이 바뀐 채로 `main`에 올라가면 GitHub Pages도 1~2분 뒤에 새 버전으로 바뀌어요.
 
 ## 익명 사용 통계
 
