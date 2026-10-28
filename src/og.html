@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>지름신 퇴치소 링크 미리보기 그림</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=IBM+Plex+Sans+KR:wght@600&family=Nanum+Gothic+Coding:wght@400;700&display=block">
+<style>
+/* og.sh가 이 페이지를 1200×630으로 찍어 docs/og.png(링크 공유 미리보기 그림)를 만든다.
+   영수증 숫자는 앱의 첫 예시(새 아이폰 프로)를 분석한 값이다. */
+* { box-sizing: border-box; margin: 0; }
+html, body { width: 1200px; height: 630px; overflow: hidden; }
+body { position: relative; background: #F2D04B; color: #1A1D24; font-family: "IBM Plex Sans KR", sans-serif; }
+
+.brand { position: absolute; left: 72px; top: 60px; display: flex; align-items: center; gap: 18px; font-family: "Black Han Sans"; font-size: 40px; }
+.seal {
+  width: 62px; height: 62px; display: grid; place-items: center;
+  background: #C42A20; color: #fff; border-radius: 7px; transform: rotate(-5deg);
+  box-shadow: inset 0 0 0 4px #C42A20, inset 0 0 0 6px #fff;
+  writing-mode: vertical-rl; font-size: 21px; line-height: 1; letter-spacing: .05em;
+}
+h1 { position: absolute; left: 72px; top: 178px; font-family: "Black Han Sans"; font-weight: 400; font-size: 58px; line-height: 1.14; letter-spacing: -.01em; }
+h1 em { font-style: normal; color: #C42A20; }
+.sub { position: absolute; left: 74px; top: 336px; width: 580px; font-size: 26px; font-weight: 600; line-height: 1.5; color: #4C5361; }
+.url { position: absolute; left: 74px; bottom: 58px; font-family: "Nanum Gothic Coding"; font-weight: 700; font-size: 24px; color: #4C5361; }
+
+.receipt {
+  position: absolute; left: 720px; top: 76px; width: 372px;
+  background: #fff; padding: 28px 26px 24px; transform: rotate(3deg);
+  font-family: "Nanum Gothic Coding"; font-size: 17px; line-height: 1.85;
+  box-shadow: 0 20px 40px -20px rgba(42, 23, 8, .5);
+}
+.receipt::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: -12px; height: 12px;
+  background:
+    linear-gradient(135deg, #fff 50%, transparent 50%) 0 0 / 14px 12px repeat-x,
+    linear-gradient(225deg, #fff 50%, transparent 50%) 0 0 / 14px 12px repeat-x;
+}
+.t { text-align: center; font-weight: 700; font-size: 22px; letter-spacing: .3em; line-height: 1.3; }
+.m { text-align: center; color: #5F6673; font-size: 13px; }
+hr { border: 0; border-top: 1.5px dashed #5F6673; margin: 10px 0; }
+hr.d { border-top: 4px double #1A1D24; }
+.it { font-weight: 700; }
+.r { display: flex; align-items: baseline; gap: 6px; }
+.r i { flex: 1; border-bottom: 2px dotted rgba(95, 102, 115, .5); transform: translateY(-5px); }
+.r.minus b { color: #C42A20; font-weight: 400; }
+.r b { font-weight: 400; }
+.r.grand { font-weight: 700; font-size: 19px; }
+.r.grand b { font-weight: 700; background: #FFE36B; padding: 0 4px; }
+.bars { display: block; width: 100%; height: 44px; margin-top: 12px; }
+.foot { margin-top: 8px; text-align: center; color: #C42A20; font-weight: 700; font-size: 16px; }
+
+.stamp {
+  position: absolute; left: 1026px; top: 24px; transform: rotate(-12deg);
+  padding: 14px 20px; border: 6px solid #C42A20; border-radius: 12px;
+  font-family: "Black Han Sans"; font-size: 46px; line-height: 1.04; color: #C42A20; text-align: center;
+  mix-blend-mode: multiply; opacity: .92;
+}
+.stamp::before { content: ""; position: absolute; inset: 5px; border: 2.5px solid #C42A20; border-radius: 7px; }
+</style>
+</head>
+<body>
+<div class="brand"><span class="seal">퇴치</span>지름신 퇴치소</div>
+<h1>결제 버튼 누르기 전에,<br><em>지름신</em>부터 확인하세요</h1>
+<p class="sub">물건·구독·명품·주식까지, 세계 보유율과<br>진짜 비용을 따져 충동구매를 막아 드려요.</p>
+<p class="url">eunhorang.github.io/jirumsin</p>
+
+<div class="receipt">
+  <p class="t">결제 전 영수증</p>
+  <p class="m">지름신 퇴치소 · No.339445</p>
+  <hr>
+  <p class="it">품목 · 새 아이폰 프로</p>
+  <hr>
+  <p class="r"><span>판매가</span><i></i><b>1,790,000</b></p>
+  <p class="r"><span>숨은 비용 (3년)</span><i></i><b>+268,500</b></p>
+  <p class="r minus"><span>3년 뒤 되팔면</span><i></i><b>-744,640</b></p>
+  <hr class="d">
+  <p class="r grand"><span>실제로 사라지는 돈</span><i></i><b>1,313,860</b></p>
+  <p class="r"><span>노동 시간</span><i></i><b>173시간</b></p>
+  <svg class="bars" id="bars" viewBox="0 0 300 46" preserveAspectRatio="none" aria-hidden="true"></svg>
+  <p class="foot">참으면 179만 원을 지켜요.</p>
+</div>
+<div class="stamp">결제<br>중지</div>
+
+<script>
+// 앱의 영수증 바코드와 같은 방식으로 막대를 그린다(값은 고정 씨앗이라 늘 같다)
+let s = 339445;
+const rnd = () => { s = (s * 1103515245 + 12345) % 2147483648; return s / 2147483648; };
+let bars = '';
+for (let x = 0; x < 296;) {
+  const w = 1 + Math.floor(rnd() * 3);
+  if (rnd() > .42) bars += `<rect x="${x}" y="0" width="${w}" height="46" fill="#1A1D24"/>`;
+  x += w + 1;
+}
+document.getElementById('bars').innerHTML = bars;
+</script>
+</body>
+</html>
