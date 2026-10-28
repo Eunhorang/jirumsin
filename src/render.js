@@ -23,9 +23,10 @@ function renderResult(a, status) {
       <section class="a-chat sec" id="sec-chat" hidden></section>
     </div>
     <div class="actions" id="actions"></div>
-    <div class="buy-panel" id="buy-panel" hidden></div>`;
+    <div class="buy-panel" id="buy-panel" hidden></div>
+    ${HAS_STATS && !a.example ? '<div class="feedback" id="feedback"></div>' : ''}`;
   renderVerdict(a, true); renderOwn(a, true); renderReceipt(a); renderPsych(a); renderReasons(a);
-  renderCurve(a); renderAlts(a); renderLetter(a); renderActions(a);
+  renderCurve(a); renderAlts(a); renderLetter(a); renderActions(a); renderFeedback(a);
   setStatus(status || 'local');
 }
 function flash(id) {
@@ -325,6 +326,17 @@ function renderActions(a) {
     <p class="lead">필요한 소비라면 괜찮아요. 아래만 확인하고 사세요.</p>
     <ul>${checks.map((t, i) => `<li><label class="check"><input type="checkbox" id="chk-${i}"> ${esc(t)}</label></li>`).join('')}</ul>
     <div><button class="btn" type="button" data-act="bought">샀다고 기록하기</button></div>`;
+}
+// 분석이 도움이 됐는지 묻는다. 통계가 붙은 Pages판에서 직접 돌린 분석에만 있고(첫 화면 예시에는 없다), 한 분석에 한 번만 받는다.
+function renderFeedback(a) {
+  const el = $('#feedback');
+  if (!el) return;
+  el.innerHTML = a.voted ? '<p class="fb-done" tabindex="-1">고마워요!</p>' : `
+    <p id="fb-q">이 분석이 도움이 됐나요?</p>
+    <div class="fb-btns" role="group" aria-labelledby="fb-q">
+      <button class="btn" type="button" data-act="vote" data-vote="up" aria-label="도움이 됐어요">👍</button>
+      <button class="btn" type="button" data-act="vote" data-vote="down" aria-label="도움이 안 됐어요">👎</button>
+    </div>`;
 }
 function summaryText(a) {
   const o = a.own;

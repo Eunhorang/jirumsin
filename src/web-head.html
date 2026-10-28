@@ -13,3 +13,25 @@
 <meta name="theme-color" content="#111317" media="(prefers-color-scheme: dark)">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='4' y='4' width='56' height='56' rx='10' fill='%23C42A20'/%3E%3Ctext x='32' y='44' font-size='32' font-weight='700' text-anchor='middle' fill='%23fff' font-family='sans-serif'%3E%ED%87%B4%3C/text%3E%3C/svg%3E">
 <style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<script>
+/* 내 방문 제외: 주소에 ?notrack=1을 붙여 열면 이 브라우저의 방문이 Umami 통계에서 빠지고, ?notrack=0이면 다시 잡힌다.
+   Umami가 'umami.disabled'를 읽기 전에 저장해야 링크를 연 그 방문부터 빠지므로 Umami 스크립트보다 앞에 둔다. */
+(() => {
+  const v = new URLSearchParams(location.search).get('notrack');
+  if (v === null) return;
+  let msg = '';
+  try {
+    if (v === '1') { localStorage.setItem('umami.disabled', '1'); msg = '이 브라우저의 방문은 통계에서 빠져요'; }
+    else if (v === '0') { localStorage.removeItem('umami.disabled'); msg = '이 브라우저의 방문도 다시 통계에 잡혀요'; }
+  } catch (e) { /* 저장소를 쓸 수 없는 브라우저 */ }
+  // notrack만 지우고 utm_ 같은 나머지 꼬리표와 # 뒷부분은 글자 그대로 남긴다
+  const q = location.search.slice(1).split('&').filter(p => p.split('=')[0] !== 'notrack').join('&');
+  history.replaceState(history.state, '', location.pathname + (q ? '?' + q : '') + location.hash);
+  if (msg) document.addEventListener('DOMContentLoaded', () => {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.classList.add('show');
+    setTimeout(() => { if (t.textContent === msg) t.classList.remove('show'); }, 4000);
+  });
+})();
+</script>
+<script defer src="https://cloud.umami.is/script.js" data-website-id="63fd05df-3a5b-4ae9-b532-b2b4cc97c00c"></script>

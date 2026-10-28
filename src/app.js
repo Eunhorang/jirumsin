@@ -72,6 +72,20 @@ function copyText(t) {
   try { navigator.clipboard.writeText(t).then(() => toast('결과를 복사했어요.'), fallback); } catch (e) { fallback(); }
 }
 
+/* ── 익명 사용 통계 (GitHub Pages판에만) ─── */
+// Umami 스크립트는 src/web-head.html에만 있어서 아티팩트판에는 없다. 피드백 버튼과 통계 안내도 이 값을 보고 Pages판에만 보인다.
+const HAS_STATS = !!document.querySelector('script[data-website-id]');
+// window.umami가 없거나(아티팩트, 광고 차단) ?notrack=1로 이 브라우저를 뺐으면 아무것도 보내지 않는다.
+// 입력한 품목 이름, 정확한 금액, 시급, 저금통 목표 이름은 보내지 않는다. 금액은 아래 구간으로만 보낸다.
+function track(name, data) {
+  try {
+    if (!window.umami || localStorage.getItem('umami.disabled')) return;
+    window.umami.track(name, data);
+  } catch (e) { /* 통계가 실패해도 앱은 그대로 동작한다 */ }
+}
+// 만 원 단위: 3만 미만 · 3만~10만 · 10만~50만 · 50만~200만 · 200만 이상
+const priceBand = won => won < 3e4 ? 'under3' : won < 1e5 ? '3to10' : won < 5e5 ? '10to50' : won < 2e6 ? '50to200' : 'over200';
+
 /* ── 지름 신고서 ─────────────────────────── */
 function buildForm() {
   $('#examples').innerHTML = EXAMPLES.map((x, i) => `<button class="ex" type="button" data-ex="${i}">${esc(x.item)}</button>`).join('');
@@ -121,6 +135,7 @@ function analyze(inp, opts = {}) {
   a.example = !!opts.example;
   renderResult(a, opts.example ? 'example' : 'local');
   if (!opts.example) {
+    track('analyze', { cat: a.type, item: a.entryId || 'other', price: priceBand(a.price), priced: a.priceSource === 'user' ? 'yes' : 'no', verdict: a.level.key });
     if (aiOn()) runAI(a);
     $('#sec-verdict h2').focus({ preventScroll: true });
     $('#result').scrollIntoView({ behavior: reduceMotion() ? 'auto' : 'smooth', block: 'start' });
@@ -174,6 +189,7 @@ function onWaitClick(ev) {
     setTimeout(() => { if (b.isConnected) { delete b.dataset.confirm; b.textContent = '보류 취소'; } }, 3000);
     return;
   }
+  track('wait_action', { action: act });
   if (act === 'resist') {
     state.wait = state.wait.filter(x => x !== w);
     state.jar.unshift({ id: uid(), name: w.name, amount: w.amount, at: Date.now() });
@@ -269,6 +285,7 @@ function onJarSubmit(ev) {
   const name = $('#goal-name').value.trim(), amount = digits($('#goal-amt').value);
   if (!name || !amount) { toast('목표 이름과 금액을 모두 적어 주세요.'); return; }
   state.goal = { name, amount };
+  track('jar_goal_set');
   goalEditing = false;
   saveState(); renderJar(); $('[data-j="goal-edit"]').focus(); toast('목표를 정했어요. 참을 때마다 가까워져요.');
 }
@@ -281,10 +298,11 @@ function updateBadges() {
 }
 function showView(v) {
   if (!['analyze', 'wait', 'jar'].includes(v)) v = 'analyze';
+  const opened = $(`#view-${v}`).hidden; // 이미 보던 탭을 다시 누른 건 열기로 세지 않는다
   $$('.tab').forEach(t => { const on = t.dataset.view === v; t.setAttribute('aria-selected', String(on)); t.tabIndex = on ? 0 : -1; });
   $$('.view').forEach(s => { s.hidden = s.id !== 'view-' + v; });
-  if (v === 'wait') renderWait();
-  if (v === 'jar') renderJar();
+  if (v === 'wait') { renderWait(); if (opened) track('open_wait'); }
+  if (v === 'jar') { renderJar(); if (opened) track('open_jar'); }
   if (v === 'analyze' && current) {
     const d = current.decided;
     // 보류함·저금통에서 그 기록을 이미 정리했다면 결정 바 문구도 맞춰 둔다
@@ -304,6 +322,7 @@ function focusView(v) {
 /* ── 시작 ───────────────────────────────── */
 function start() {
   document.documentElement.lang = 'ko';
+  $('#stats-note').hidden = !HAS_STATS;
   buildForm();
   bindMoney($('#price'));
   bindMoney($('#wage'));
@@ -330,6 +349,8 @@ function start() {
     const b = ev.target.closest('[data-act]');
     if (!b || !current) return;
     const a = current, act = b.dataset.act;
+    if (act === 'resist' || act === 'hold' || act === 'bought') track('decide', { action: act });
+    else if (act === 'copy' || act === 'card') track('share', { how: act });
     // 결정을 기록하고 결정 바를 다시 그린다. 키보드로 눌렀다면 포커스를 바 안에 돌려놓는다.
     const settle = (d, msg) => {
       const refocus = document.activeElement === b;
@@ -349,7 +370,8 @@ function start() {
     } else if (act === 'buy') {
       const p = $('#buy-panel');
       p.hidden = !p.hidden;
-      if (!p.hidden) p.scrollIntoView({ block: 'nearest', behavior: reduceMotion() ? 'auto' : 'smooth' });
+      // 점검 창을 닫는 클릭은 결정이 아니므로 열 때만 센다
+      if (!p.hidden) { track('decide', { action: 'buy' }); p.scrollIntoView({ block: 'nearest', behavior: reduceMotion() ? 'auto' : 'smooth' }); }
     } else if (act === 'bought') {
       const x = { id: uid(), name: a.name, amount: Math.round(saveAmount(a)), at: Date.now() };
       state.bought.unshift(x);
@@ -362,6 +384,14 @@ function start() {
       state[d.key] = state[d.key].filter(x => x.id !== d.id);
       saveState();
       settle(null, '결정을 되돌렸어요.');
+    } else if (act === 'vote') {
+      // 한 분석에 한 번만 보낸다. 다시 그려도 a.voted가 남아 있어 '고마워요!'로 보인다.
+      if (a.voted) return;
+      const refocus = document.activeElement === b;
+      a.voted = b.dataset.vote === 'down' ? 'down' : 'up';
+      track('feedback', { vote: a.voted });
+      renderFeedback(a);
+      if (refocus) $('#feedback .fb-done').focus();
     } else if (act === 'copy') copyText(summaryText(a));
     else if (act === 'card') openCard(a, b);
     else if (act === 'stop') { if (ai.ctl) ai.ctl.abort(); }

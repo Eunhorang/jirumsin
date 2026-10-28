@@ -20,7 +20,7 @@
 | 파일 | 내용 |
 | --- | --- |
 | `src/head.html`, `src/body.html` | 페이지 머리와 화면 뼈대 |
-| `src/web-head.html` | GitHub Pages용 페이지에만 넣는 머리(공유 미리보기, 아이콘, 기본 스타일) |
+| `src/web-head.html` | GitHub Pages용 페이지에만 넣는 머리(공유 미리보기, 아이콘, 기본 스타일, Umami 통계와 내 방문 빼기) |
 | `src/style-1.css`, `src/style-2.css` | 색 토큰(밝은·어두운 모드)과 화면 스타일 |
 | `src/data-items.js` | 품목별 보유율·가격 통계(한 줄에 한 품목) |
 | `src/data-cats.js` | 분류별 기본값, 심리 설명, 예시 |
@@ -28,7 +28,7 @@
 | `src/render.js` | 결과 화면 그리기 |
 | `src/ai.js` | Claude 정밀 분석과 담판 대화 |
 | `src/card.js` | 공유용 영수증 그림 그리기, 저장·공유 창 |
-| `src/app.js` | 신고서, 결정 바, 보류함, 저금통, 화면 전환 |
+| `src/app.js` | 신고서, 결정 바, 보류함, 저금통, 화면 전환, 익명 통계 이벤트(`track`) |
 | `build.sh` | 조각을 합쳐 `index.html`과 `docs/index.html`을 만들어요 |
 | `src/og.html`, `og.sh` | 링크 공유 미리보기 그림 `docs/og.png`(1200×630)의 원본과 찍는 스크립트 |
 
@@ -42,6 +42,15 @@
 - `docs/index.html`: GitHub Pages가 보여 주는 완전한 페이지예요. 로컬에서도 브라우저로 바로 열어 볼 수 있어요.
 
 소스는 `src`에서 고치고, 고친 뒤에는 `build.sh`를 다시 실행해요. 링크 미리보기 그림은 `src/og.html`을 고친 뒤 `./og.sh`로 다시 찍어요(Google Chrome과 인터넷 연결이 필요해요). `docs/index.html`이 바뀐 채로 `main`에 올라가면 GitHub Pages도 1~2분 뒤에 새 버전으로 바뀌어요.
+
+## 익명 사용 통계
+
+GitHub Pages판에만 [Umami](https://umami.is) 추적 코드가 들어 있어요(`src/web-head.html`). claude.ai 아티팩트판에는 없어요.
+
+- 이벤트는 `src/app.js`의 `track()`으로 보내요: `analyze`, `decide`, `share`, `wait_action`, `open_wait`, `open_jar`, `jar_goal_set`, `feedback`.
+- 입력한 품목 이름, 정확한 가격, 시급, 저금통 목표 이름은 보내지 않아요. 사전에 없는 품목은 `other`로, 가격은 만 원 단위 구간(`under3`, `3to10`, `10to50`, `50to200`, `over200`)으로만 보내요.
+- 내 방문 빼기: 주소 끝에 `?notrack=1`을 붙여 한 번 열면 그 브라우저의 방문은 통계에서 빠져요. `?notrack=0`으로 열면 다시 잡혀요. 브라우저(기기)마다 따로 해야 해요.
+- 결과 화면 맨 아래 피드백 버튼(👍 👎)과 바닥글의 통계 안내는 Pages판에서만 보여요.
 
 ## 알아 둘 점
 
