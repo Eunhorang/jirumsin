@@ -41,11 +41,11 @@
 - `index.html`: claude.ai 아티팩트 게시용이에요(문서 머리 없이 본문만 있어요).
 - `docs/index.html`: GitHub Pages가 보여 주는 완전한 페이지예요. 로컬에서도 브라우저로 바로 열어 볼 수 있어요.
 
-소스는 `src`에서 고치고, 고친 뒤에는 `build.sh`를 다시 실행해요. 링크 미리보기 그림은 `src/og.html`을 고친 뒤 `./og.sh`로 다시 찍어요(Google Chrome과 인터넷 연결이 필요해요). `docs/index.html`이 바뀐 채로 `main`에 올라가면 GitHub Pages도 1~2분 뒤에 새 버전으로 바뀌어요.
+소스는 `src`에서 고치고, 고친 뒤에는 `build.sh`를 다시 실행해요. 링크 미리보기 그림은 `src/og.html`을 고친 뒤 `./og.sh`로 다시 찍어요(Google Chrome과 인터넷 연결이 필요해요). 다시 찍었으면 `src/web-head.html`의 `og:image` 주소 끝 `?v=` 숫자를 하나 올려 주세요. 카카오톡은 같은 주소의 그림을 오래 기억해서, 주소가 바뀌어야 새 그림을 가져가요. `docs/index.html`이 바뀐 채로 `main`에 올라가면 GitHub Pages도 1~2분 뒤에 새 버전으로 바뀌어요.
 
 ## 익명 사용 통계
 
-GitHub Pages판에만 [Umami](https://umami.is) 추적 코드가 들어 있어요(`src/web-head.html`). claude.ai 아티팩트판에는 없어요.
+GitHub Pages판에만 [Umami](https://umami.is) 추적 코드가 들어 있어요(`src/web-head.html`). claude.ai 아티팩트판에는 없어요. `data-domains="jirumsin.com"`이라서 그 주소에서 연 방문만 세고, 로컬 미리보기나 다른 주소에 복사된 페이지에서는 보내지 않아요. 도메인을 바꾸면 이 값도 함께 고쳐 주세요.
 
 - 이벤트는 `src/app.js`의 `track()`으로 보내요: `analyze`, `decide`, `share`, `wait_action`, `open_wait`, `open_jar`, `jar_goal_set`, `feedback`.
 - 입력한 품목 이름, 정확한 가격, 시급, 저금통 목표 이름은 보내지 않아요. 사전에 없는 품목은 `other`로, 가격은 만 원 단위 구간(`under3`, `3to10`, `10to50`, `50to200`, `over200`)으로만 보내요.
