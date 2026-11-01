@@ -120,6 +120,7 @@ function fillForm(x) {
   exFill = { item: x.item, price: $('#price').value, type: x.type || 'auto', reasons: [...(x.reasons || [])].sort().join(), since: x.since || 'days', similar: !!x.similar };
   priceOk = null;
   $('#ex-note').hidden = true;
+  clearItemError();
   syncTypeUI();
 }
 // 예시와 다른 물건을 적기 시작하면, 예시의 가격·종류·이유가 남아 엉뚱한 분석이 나오지 않게 예시 값 그대로인 칸만 비우고 알린다
@@ -184,6 +185,18 @@ function checkPrice(inp) {
 function bindMoney(input) {
   input.addEventListener('input', () => { const n = digits(input.value); input.value = n ? comma(n) : ''; });
 }
+function clearItemError() {
+  const item = $('#item');
+  item.removeAttribute('aria-invalid'); item.removeAttribute('aria-describedby');
+  $('#item-err').hidden = true;
+}
+function markStale(ev) {
+  if (ev.target.id === 'ai-on' || !current || current.example) return;
+  const st = $('#status');
+  // Claude 분석이 도착하는 중이면 진행 안내를 덮지 않는다. 같은 안내를 거듭 읽어 주지 않게 한 번만 바꾼다.
+  if (!st || ['stale', 'ai-wait', 'ai-stream'].includes(st.dataset.kind)) return;
+  setStatus('stale');
+}
 function analyze(inp, opts = {}) {
   if (ai.ctl) ai.ctl.abort();
   if (ai.chatCtl) ai.chatCtl.abort();
@@ -242,7 +255,8 @@ function onWaitClick(ev) {
   if (act === 'remove' && !b.dataset.confirm) {
     b.dataset.confirm = '1'; b.textContent = '한 번 더 누르면 취소돼요';
     say('한 번 더 누르면 보류가 취소돼요.');
-    setTimeout(() => { if (b.isConnected) { delete b.dataset.confirm; b.textContent = '보류 취소'; } }, 3000);
+    // 확인 문구를 화면 읽기 프로그램으로 다 듣고 다시 누를 수 있게 넉넉히 기다린다
+    setTimeout(() => { if (b.isConnected) { delete b.dataset.confirm; b.textContent = '보류 취소'; } }, 8000);
     return;
   }
   track('wait_action', { action: act });
@@ -329,7 +343,7 @@ function onJarClick(ev) {
     if (!b.dataset.confirm) {
       b.dataset.confirm = '1'; b.textContent = '정말 지울까요?';
       say('한 번 더 누르면 기록이 지워져요.');
-      setTimeout(() => { if (b.isConnected) { delete b.dataset.confirm; b.textContent = '지우기'; } }, 3000);
+      setTimeout(() => { if (b.isConnected) { delete b.dataset.confirm; b.textContent = '지우기'; } }, 8000);
       return;
     }
     const li = b.closest('li'), id = li.dataset.id, key = li.dataset.kind === 'jar' ? 'jar' : 'bought';
@@ -385,17 +399,21 @@ function start() {
   bindMoney($('#price'));
   bindMoney($('#wage'));
   // 품목·종류·가격 중 하나라도 바꾸면, 앞서 확인받은 금액은 잊고 다음 제출 때 다시 본다
-  $('#item').addEventListener('input', () => { $('#item').removeAttribute('aria-invalid'); priceOk = null; clearExample(); syncTypeUI(); });
+  $('#item').addEventListener('input', () => { clearItemError(); priceOk = null; clearExample(); syncTypeUI(); });
   // 품목을 다 적고 나왔을 때 고른 종류와 맞지 않으면 화면 읽기 프로그램에도 알린다
   $('#item').addEventListener('change', () => { if (typeNote) say(typeNote); });
   $('#price').addEventListener('input', () => { priceOk = null; if ($('#price-hint').classList.contains('is-check')) syncTypeUI(); });
   $('#type-seg').addEventListener('change', () => { priceOk = null; syncTypeUI(); });
+  // 결과를 낸 뒤 신고서를 고치면, 아래 결과가 고치기 전 입력으로 낸 것임을 알린다
+  $('#form').addEventListener('input', markStale);
+  $('#form').addEventListener('change', markStale);
   $('#type-hint').addEventListener('click', ev => {
     const b = ev.target.closest('[data-type]');
     if (!b) return;
     const r = $(`input[name="type"][value="${b.dataset.type}"]`);
     r.checked = true;
     priceOk = null;
+    markStale({ target: r }); // 코드로 바꾼 선택은 change가 오지 않으니 직접 알린다
     syncTypeUI();
     r.focus(); // 누른 링크가 사라지니 포커스를 새로 고른 종류로 옮긴다
   });
@@ -410,8 +428,11 @@ function start() {
     ev.preventDefault();
     const inp = readForm();
     if (!inp.item) {
-      $('#item').setAttribute('aria-invalid', 'true'); $('#item').focus();
-      toast('무엇을 사고 싶은지 먼저 적어 주세요.');
+      // 알림은 몇 초 뒤 사라지니, 오류 문장을 입력칸 아래에 남기고 입력칸의 설명으로 이어 둔다
+      const item = $('#item');
+      item.setAttribute('aria-invalid', 'true'); item.setAttribute('aria-describedby', 'item-err');
+      $('#item-err').hidden = false;
+      item.focus();
       return;
     }
     if (!checkPrice(inp)) return;
@@ -494,7 +515,7 @@ function start() {
   });
   window.addEventListener('hashchange', () => showView(location.hash.slice(1)));
   let rz = 0;
-  window.addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(() => current && drawCrowd(current, false), 150); });
+  window.addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(() => { if (current) { drawCrowd(current, false); renderCurve(current); } }, 150); });
   const mq = window.matchMedia && matchMedia('(prefers-color-scheme: dark)');
   if (mq && mq.addEventListener) mq.addEventListener('change', () => current && drawCrowd(current, false));
   new MutationObserver(() => current && drawCrowd(current, false)).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });

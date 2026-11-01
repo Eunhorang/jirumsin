@@ -163,6 +163,7 @@ p { margin: 0; }
 button, input, select, textarea { font: inherit; color: inherit; }
 button { cursor: pointer; }
 :focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+::selection { background: var(--mark); color: var(--ink); }
 h2[tabindex="-1"]:focus { outline: none; }
 .wrap { max-width: 1120px; margin-inline: auto; }
 .num { font-variant-numeric: tabular-nums; }
@@ -194,7 +195,7 @@ h2[tabindex="-1"]:focus { outline: none; }
 .tab[aria-selected="true"] { background: var(--paper); color: var(--ink); box-shadow: 0 1px 2px rgba(0, 0, 0, .08); }
 .tab .badge {
   min-width: 20px; padding: 0 6px; border-radius: 999px;
-  background: var(--red); color: var(--on-red); font-size: .72rem; line-height: 20px; text-align: center;
+  background: var(--red); color: var(--on-red); font-size: var(--t-xs); line-height: 20px; text-align: center;
 }
 .tab .badge.save { background: var(--save); color: var(--paper); }
 .tab .badge:empty { display: none; }
@@ -251,7 +252,7 @@ input::placeholder, textarea::placeholder { color: var(--ink-3); opacity: 1; }
 .examples { display: flex; flex-wrap: wrap; gap: 6px; }
 .ex {
   border: 1px dashed var(--rule); background: transparent; color: var(--ink-2);
-  padding: 4px 10px; border-radius: 4px; font-size: var(--t-xs);
+  padding: 6px 12px; border-radius: var(--r-sm); font-size: var(--t-xs);
 }
 .ex:hover { border-color: var(--ink-3); color: var(--ink); background: var(--paper-2); }
 
@@ -271,6 +272,7 @@ input::placeholder, textarea::placeholder { color: var(--ink-3); opacity: 1; }
 .pick input:focus-visible + span { outline: 2px solid var(--focus); outline-offset: 2px; }
 .pick.is-need input:checked + span { background: var(--save); border-color: var(--save); color: var(--paper); }
 .check { display: flex; align-items: center; gap: 8px; font-size: var(--t-sm); color: var(--ink-2); cursor: pointer; }
+.field > .check { padding-block: 8px; margin-block: -8px; } /* 줄 간격은 그대로 두고 누르는 자리만 넓힌다 */
 .check input { width: 18px; height: 18px; accent-color: var(--ink); margin: 0; }
 .wage { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-size: var(--t-sm); color: var(--ink-2); }
 
@@ -341,9 +343,11 @@ input::placeholder, textarea::placeholder { color: var(--ink-3); opacity: 1; }
 .sec { display: grid; gap: 14px; min-width: 0; }
 .sec-h { display: flex; align-items: baseline; justify-content: space-between; gap: 6px 14px; flex-wrap: wrap; }
 .sec-h h3 { font-family: var(--font-display); font-weight: 400; font-size: var(--t-xl); letter-spacing: -.01em; }
-.eyebrow { font-size: .78rem; font-weight: 700; letter-spacing: .06em; color: var(--ink-3); }
+.eyebrow { font-size: var(--t-xs); font-weight: 700; letter-spacing: .06em; color: var(--ink-3); }
+/* 보유율 카드는 큰 숫자가 앞에 서므로 구역 제목을 작게 둔다(제목 요소는 그대로 h3) */
+.sec-h h3.eyebrow { font-family: var(--font-body); font-size: var(--t-xs); font-weight: 700; letter-spacing: .06em; line-height: 1.6; }
 .src {
-  font-size: .72rem; font-weight: 700; padding: 2px 9px; border-radius: 999px;
+  font-size: var(--t-xs); font-weight: 700; padding: 2px 9px; border-radius: 999px;
   border: 1px solid var(--rule); color: var(--ink-3); white-space: nowrap;
 }
 .src.ai { border-color: var(--red); color: var(--red); }
@@ -372,7 +376,6 @@ input::placeholder, textarea::placeholder { color: var(--ink-3); opacity: 1; }
 }
 .stamp.hit { animation: stamp-in .45s cubic-bezier(.2, .9, .3, 1.25) both; }
 .charm-body { display: grid; gap: 10px; min-width: 0; }
-.charm-body .eyebrow { color: var(--charm-ink); opacity: .7; }
 .charm h2 { font-family: var(--font-display); font-weight: 400; font-size: var(--t-2xl); line-height: 1.2; }
 .charm .line { font-size: var(--t-lg); font-weight: 500; }
 .meter { display: grid; gap: 6px; margin-top: 4px; }
@@ -380,12 +383,13 @@ input::placeholder, textarea::placeholder { color: var(--ink-3); opacity: 1; }
 .meter-top b { font-family: var(--font-display); font-weight: 400; font-size: 1.6rem; color: var(--charm-red); }
 .meter-track { position: relative; height: 12px; border-radius: 999px; background: rgba(42, 23, 8, .14); overflow: hidden; }
 .meter-fill { position: absolute; inset: 0 auto 0 0; background: var(--charm-red); border-radius: 999px; transition: width .6s ease; }
-.meter-scale { display: grid; grid-template-columns: repeat(4, 1fr); font-size: .72rem; font-weight: 600; opacity: .75; }
+.meter-scale { display: grid; grid-template-columns: repeat(4, 1fr); font-size: var(--t-xs); font-weight: 600; opacity: .75; }
 .meter-scale span:nth-child(2) { text-align: center; }
 .meter-scale span:nth-child(3) { text-align: center; }
 .meter-scale span:last-child { text-align: right; }
 .why-score { font-size: var(--t-xs); }
-.why-score summary { cursor: pointer; font-weight: 600; width: fit-content; padding-block: 2px; }
+.why-score summary { cursor: pointer; font-weight: 600; width: fit-content; padding-block: 10px; margin-block: -8px; }
+.why-score summary::marker { color: var(--charm-red); }
 .why-score ul { margin: 6px 0 0; padding-left: 1.1em; }
 @media (max-width: 560px) { .charm { grid-template-columns: minmax(0, 1fr); } .stamp { justify-self: start; } }
 
@@ -403,11 +407,11 @@ input::placeholder, textarea::placeholder { color: var(--ink-3); opacity: 1; }
 .crowd figcaption { color: var(--ink-2); font-size: var(--t-sm); }
 .facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; background: var(--rule); border: 1px solid var(--rule); border-radius: var(--r-sm); overflow: hidden; margin: 0; }
 .facts div { background: var(--paper); padding: 10px 12px; display: grid; gap: 2px; }
-.facts dt { font-size: .75rem; color: var(--ink-3); font-weight: 600; }
+.facts dt { font-size: var(--t-xs); color: var(--ink-3); font-weight: 600; }
 .facts dd { margin: 0; font-weight: 700; font-variant-numeric: tabular-nums; }
 @media (max-width: 520px) { .facts { grid-template-columns: minmax(0, 1fr); } }
 .basis { font-size: var(--t-xs); color: var(--ink-3); }
-.perspective { font-size: var(--t-sm); color: var(--ink-2); border-left: 3px solid var(--red); padding-left: 12px; }
+.perspective { font-size: var(--t-sm); color: var(--ink-2); border-top: 1px solid var(--rule); padding-top: 14px; }
 
 /* ── 결제 전 영수증 ───────────────────────── */
 .receipt {
@@ -422,8 +426,9 @@ input::placeholder, textarea::placeholder { color: var(--ink-3); opacity: 1; }
     linear-gradient(135deg, var(--paper) 50%, transparent 50%) 0 0 / 14px 12px repeat-x,
     linear-gradient(225deg, var(--paper) 50%, transparent 50%) 0 0 / 14px 12px repeat-x;
 }
-.rc-title { text-align: center; font-weight: 700; font-size: 1.05rem; letter-spacing: .3em; }
-.rc-meta { text-align: center; color: var(--ink-3); font-size: .74rem; }
+.rc-title { text-align: center; font-weight: 700; font-size: 1.05rem; letter-spacing: .3em; line-height: 1.6; }
+.rc-meta { text-align: center; color: var(--ink-3); font-size: var(--t-xs); }
+.rc-kind { color: var(--ink-2); }
 .rc-rule { border: 0; border-top: 1px dashed var(--ink-3); margin: 10px 0; }
 .rc-rule.double { border-top: 3px double var(--ink); }
 .rc-line { display: flex; align-items: baseline; gap: 6px; }
@@ -435,18 +440,19 @@ input::placeholder, textarea::placeholder { color: var(--ink-3); opacity: 1; }
 .rc-line.total { font-weight: 700; }
 .rc-line.grand { font-weight: 700; font-size: 1rem; }
 .rc-line.grand .v { background: var(--mark); padding: 0 4px; }
-.rc-sub { color: var(--ink-3); font-size: .76rem; padding-left: 1.2em; }
-.rc-ctl { display: grid; gap: 4px; margin: 6px 0 2px; font-size: .78rem; color: var(--ink-2); }
+.rc-sub { color: var(--ink-3); font-size: var(--t-xs); padding-left: 1.2em; }
+.rc-ctl { display: grid; gap: 4px; margin: 6px 0 2px; font-size: var(--t-xs); color: var(--ink-2); }
 .rc-ctl input { width: 100%; height: 24px; margin: 0; accent-color: var(--red); }
 .barcode { margin-top: 14px; }
 .barcode svg { display: block; width: 100%; height: 46px; }
-.rc-foot { text-align: center; font-size: .74rem; color: var(--ink-3); margin-top: 6px; }
+.rc-foot { text-align: center; font-size: var(--t-sm); color: var(--ink-3); margin-top: 8px; }
+.rc-foot b { color: var(--ink); }
 .swap-h { font-weight: 700; font-size: var(--t-sm); margin-bottom: 8px; }
 .swap { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1px; background: var(--rule); border: 1px solid var(--rule); border-radius: var(--r-sm); overflow: hidden; }
 .swap div { background: var(--paper); padding: 10px 12px; display: grid; gap: 0; }
 .swap b { font-family: var(--font-display); font-weight: 400; font-size: 1.45rem; line-height: 1.2; font-variant-numeric: tabular-nums; }
-.swap span { font-size: .78rem; color: var(--ink-2); }
-.swap-note { font-size: .72rem; color: var(--ink-3); margin-top: 6px; }
+.swap span { font-size: var(--t-xs); color: var(--ink-2); }
+.swap-note { font-size: var(--t-xs); color: var(--ink-3); margin-top: 6px; }
 
 /* ── 심리·이유·대안 ─────────────────────── */
 .want { background: var(--paper); border-radius: var(--r-sm); padding: 14px 16px; font-size: var(--t-lg); border: 1px solid var(--rule); }
@@ -493,7 +499,7 @@ input::placeholder, textarea::placeholder { color: var(--ink-3); opacity: 1; }
 
 /* ── 반론하기 ───────────────────────────── */
 .msgs { display: grid; gap: 10px; }
-.msg { max-width: 88%; padding: 10px 14px; border-radius: 14px; white-space: pre-line; font-size: var(--t-sm); }
+.msg { max-width: 88%; padding: 10px 14px; border-radius: var(--r-md); white-space: pre-line; font-size: var(--t-sm); }
 .msg.me { justify-self: end; background: var(--ink); color: var(--paper); border-bottom-right-radius: 4px; }
 .msg.ai { justify-self: start; background: var(--paper); border: 1px solid var(--rule); border-bottom-left-radius: 4px; }
 .chat-form { display: flex; gap: 8px; align-items: flex-end; }
@@ -507,7 +513,7 @@ input::placeholder, textarea::placeholder { color: var(--ink-3); opacity: 1; }
   padding: 12px 14px;
 }
 .actions .grow { flex: 1 1 12em; min-width: 0; font-size: var(--t-sm); color: var(--ink-2); }
-.hold { display: flex; gap: 4px; align-items: center; flex-wrap: wrap; }
+.hold { display: flex; gap: 6px; align-items: stretch; flex-wrap: wrap; }
 .hold select { background: var(--paper-2); border: 1.5px solid var(--field); border-radius: var(--r-sm); padding: 8px 8px; font-size: var(--t-sm); }
 .buy-panel { background: var(--paper); border-radius: var(--r-md); border: 1px solid var(--rule); padding: 18px; display: grid; gap: 12px; }
 .buy-panel ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
@@ -586,7 +592,7 @@ input::placeholder, textarea::placeholder { color: var(--ink-3); opacity: 1; }
 .cv-text { fill: var(--ink-3); font-size: 13px; font-family: var(--font-body); }
 .cv-label { fill: var(--ink); font-size: 14px; font-weight: 700; font-family: var(--font-body); }
 .rc-item { font-weight: 700; overflow-wrap: anywhere; }
-.swap b small { font-family: var(--font-body); font-size: .8rem; font-weight: 600; margin-left: 2px; color: var(--ink-2); }
+.swap b small { font-family: var(--font-body); font-size: var(--t-xs); font-weight: 600; margin-left: 2px; color: var(--ink-2); }
 .wcard .ask { flex-basis: 100%; color: var(--ink-2); font-size: var(--t-sm); }
 .jar-fill { fill: var(--save); opacity: .26; }
 .jar-glass { fill: none; stroke: var(--ink); stroke-width: 3; }
@@ -609,10 +615,11 @@ input::placeholder, textarea::placeholder { color: var(--ink-3); opacity: 1; }
 .card-msg:empty { display: none; }
 .card-btns { display: flex; flex-wrap: wrap; gap: 8px; }
 .card-btns .btn { flex: 1 1 auto; }
-/* 휴대폰: 결정 바를 두 줄로 줄여 화면을 덜 가린다 */
+/* 휴대폰: 결정 바를 두 줄로 줄여 화면을 덜 가린다. 반대되는 결정이 붙어 있으니 누르는 자리는 44px를 지킨다 */
 @media (max-width: 560px) {
-  .actions { gap: 6px; padding: 8px; }
-  .actions .btn { padding: 8px 10px; font-size: var(--t-xs); }
+  .tab { padding-block: 10px; }
+  .actions { gap: 8px; padding: 8px; }
+  .actions .btn { min-height: 44px; padding: 8px 10px; font-size: var(--t-xs); }
   .actions.is-done .grow { flex-basis: 100%; }
   .actions:not(.is-done) { display: grid; grid-template-columns: minmax(0, 1fr) auto; }
   .actions:not(.is-done) .grow { display: none; }
@@ -620,7 +627,7 @@ input::placeholder, textarea::placeholder { color: var(--ink-3); opacity: 1; }
   .actions [data-act="buy"] { grid-area: 1 / 2; }
   .actions .hold { grid-area: 2 / 1; flex-wrap: nowrap; }
   .actions [data-act="copy"] { grid-area: 2 / 2; }
-  .hold select { padding: 6px 4px; font-size: var(--t-xs); }
+  .hold select { min-height: 44px; padding: 6px 4px; font-size: var(--t-xs); }
 }
 </style>
 </head>
@@ -652,6 +659,7 @@ input::placeholder, textarea::placeholder { color: var(--ink-3); opacity: 1; }
         <div class="field">
           <label for="item">무엇을 사고 싶나요?</label>
           <input class="input input-item" id="item" name="item" type="text" autocomplete="off" maxlength="60" placeholder="예: 아이폰, 넷플릭스, 롤렉스, 테슬라 주식">
+          <p class="hint is-check" id="item-err" hidden>무엇을 사고 싶은지 먼저 적어 주세요.</p>
           <div class="examples" id="examples" role="group" aria-label="예시로 채워 보기"></div>
           <p class="hint" id="ex-note" hidden></p>
         </div>
@@ -1079,7 +1087,7 @@ function ownership(m, price) {
   }
   const g = ownGuess(m.type, price);
   return { ...g, kr: null, conf: '낮음', ref: null, broad: true,
-    basis: '사전에 없는 품목이라 가격대가 비슷한 물건의 보급률로 어림했어요. Claude 정밀 분석을 켜면 더 정확해져요.' };
+    basis: '사전에 없는 품목이라 가격대가 비슷한 물건의 보급률로 어림했어요.' };
 }
 
 /* ── 돈 계산 ────────────────────────────── */
@@ -1348,7 +1356,6 @@ function renderVerdict(a, hit) {
   <div class="charm">
     <div class="stamp${hit ? ' hit' : ''}" aria-hidden="true">${esc(L.stamp).replace('\n', '<br>')}</div>
     <div class="charm-body">
-      <p class="eyebrow">지름신 판정 · ${esc(TYPE_NAME[a.type])}</p>
       <h2 tabindex="-1">${esc(L.head)}</h2>
       <p class="line">${esc(a.line)}</p>
       <div class="meter" role="img" aria-label="충동 지수 100점 만점에 ${a.score}점">
@@ -1378,7 +1385,7 @@ function renderOwn(a, animate) {
     const ask = !o.basic ? '' : a.input.similar ? ' 비슷한 걸 이미 가지고 있다고 했어요. 지금 것으로 충분한지 먼저 보세요.' : ' 지금 가진 것 가운데 비슷한 게 있는지부터 떠올려 보세요.';
     $('#sec-own').innerHTML = `
   <section class="own" aria-labelledby="own-h">
-    <div class="sec-h"><p class="eyebrow" id="own-h">전 세계 보유율 추정</p>${srcBadge(a, 'own')}</div>
+    <div class="sec-h"><h3 class="eyebrow" id="own-h">전 세계 보유율 추정</h3>${srcBadge(a, 'own')}</div>
     <p class="own-sub">${esc(o.note + ask)}</p>
     <p class="basis">근거 · ${esc(o.basis)}</p>
   </section>`;
@@ -1393,7 +1400,7 @@ function renderOwn(a, animate) {
   const broad = o.broad && o.ref ? ` <span class="hint">(${esc(o.ref)} 전체 기준)</span>` : '';
   $('#sec-own').innerHTML = `
   <section class="own" aria-labelledby="own-h">
-    <div class="sec-h"><p class="eyebrow" id="own-h">전 세계 보유율 추정</p>${srcBadge(a, 'own')}</div>
+    <div class="sec-h"><h3 class="eyebrow" id="own-h">전 세계 보유율 추정</h3>${srcBadge(a, 'own')}</div>
     <div class="own-head">
       <div class="own-big"><span class="n num">${fmtPct(o.pct)}</span><span class="u">%</span></div>
       <p class="own-sub">${ownSentence(a)}${broad}</p>
@@ -1532,11 +1539,11 @@ function renderReceipt(a) {
   const body = receiptRows(a).map(([k, ...x]) => html[k](...x)).join('');
   $('#sec-receipt').innerHTML = `
     <div class="receipt">
-      <p class="rc-title">결제 전 영수증</p>
+      <h3 class="rc-title">결제 전 영수증</h3>
       <p class="rc-meta">지름신 퇴치소 · No.${receiptNo(a)} · ${nowStamp()}</p>
-      <hr class="rc-rule"><div class="rc-item">품목 · ${esc(a.name)}</div><hr class="rc-rule">${body}
+      <hr class="rc-rule"><div class="rc-item">품목 · ${esc(a.name)}</div><div class="rc-kind">분류 · ${esc(TYPE_NAME[a.type])}</div><hr class="rc-rule">${body}
       <div class="barcode">${barcode(a.name)}</div>
-      <p class="rc-foot">이 영수증은 결제되지 않았습니다.<br>참으면 ${krw(saveAmount(a))}을 지켜요.</p>
+      <p class="rc-foot">이 영수증은 결제되지 않았습니다.<br><b>참으면 ${krw(saveAmount(a))}을 지켜요.</b></p>
     </div>
     <button class="btn rc-share" type="button" data-act="card">영수증 이미지로 저장·공유</button>
     ${swapHTML(a.type === 'sub' ? m.y1 : m.base, a.type === 'sub' ? '1년 구독료면' : '이 돈이면')}`;
@@ -1553,7 +1560,7 @@ function renderPsych(a) {
     <div class="sec-h"><h3>지금 당신의 지름신은</h3>${srcBadge(a, 'psych')}</div>
     ${a.level.key === 'ok' ? '' : `<p class="want">사실 원하는 건 ${esc(a.name)}보다 <mark>${esc(a.want)}</mark>일지도 몰라요.</p>`}
     <ul class="psy">${a.psych.map(p => `
-      <li><div class="psy-top"><b>${esc(p.n)}</b><span>${p.s}</span></div>
+      <li><div class="psy-top"><b>${esc(p.n)}</b><span>${p.s}점</span></div>
         <div class="bar" role="img" aria-label="${esc(p.n)} 100점 만점에 ${p.s}점"><i class="${p.s >= 60 ? 'hot' : ''}" style="width:${p.s}%"></i></div>
         <p>${esc(p.d)}</p></li>`).join('')}</ul>`;
 }
@@ -1563,8 +1570,9 @@ function renderReasons(a) {
     <div class="sec-h"><h3>${well ? '잘 사는 법' : a.level.key === 'ok' ? '사기 전에 따져 볼 점' : '사면 안 되는 이유'}</h3>${well ? '<span class="src">기본 추정</span>' : srcBadge(a, 'reasons')}</div>
     <ol class="reasons${well ? ' is-ok' : ''}">${reasonList(a).map(r => `<li><h4>${esc(r.t)}</h4><p>${esc(r.d)}</p></li>`).join('')}</ol>`;
 }
-function curveSVG(thrill) {
-  const W = 640, H = 230, L = 20, Rr = 20, T = 30, B = 40, span = Math.max(60, Math.round(thrill * 3)), tau = thrill / 2.3;
+// W는 그래프가 실제로 그려질 폭이다. 640으로 그려 휴대폰에서 줄이면 글자가 7px쯤으로 작아져서, 좁은 화면에서는 그 폭으로 다시 그린다.
+function curveSVG(thrill, W = 640) {
+  const H = W < 560 ? 190 : 230, L = 20, Rr = 20, T = 30, B = 40, span = Math.max(60, Math.round(thrill * 3)), tau = thrill / 2.3;
   const f = t => .22 + .72 * Math.exp(-t / tau);
   const x = t => L + (t / span) * (W - L - Rr), y = v => T + (1 - v) * (H - T - B);
   let d = '';
@@ -1605,7 +1613,8 @@ function renderCurve(a) {
   const note = a.type === 'exp' ? '경험은 물건보다 만족이 오래가는 편이에요. 다만 할부라면 설렘이 끝난 뒤에도 결제는 계속돼요.'
     : a.type === 'sub' ? '구독은 처음 며칠 몰아 쓰고 나면 손이 덜 가기 쉬워요. 그래도 결제는 매달 똑같이 나가요.'
     : `새것의 기쁨은 보통 몇 주 안에 익숙해져요. ${t}일쯤 지나면 이 물건은 '원래 있던 물건'이 돼요.`;
-  el.innerHTML = `<div class="sec-h"><h3>설렘 유통기한</h3>${srcBadge(a, 'cost')}</div><div class="curve">${curveSVG(t)}</div><p class="curve-note">${esc(note)}</p>`;
+  const W = clamp(Math.round(el.clientWidth || innerWidth - 32), 320, 640); // 다른 탭이 열려 있어 폭이 0이면 화면 폭으로 어림한다
+  el.innerHTML = `<div class="sec-h"><h3>설렘 유통기한</h3>${srcBadge(a, 'cost')}</div><div class="curve">${curveSVG(t, W)}</div><p class="curve-note">${esc(note)}</p>`;
 }
 function renderAlts(a) {
   $('#sec-alts').innerHTML = `
@@ -1709,7 +1718,9 @@ function setStatus(kind, info, retry) {
     'ai-off': '<span class="grow">Claude를 쓸 수 없어서 기본 추정으로 보여 드려요.</span>',
     'ai-empty': '<span class="grow">Claude의 답을 읽지 못해서 기본 추정으로 보여 드려요.</span><button class="btn btn-sm" type="button" data-act="retry">다시 시도</button>',
     'ai-error': `<span class="grow">${esc(info)}</span>${retry ? '<button class="btn btn-sm" type="button" data-act="retry">다시 시도</button>' : ''}`,
+    stale: `<span class="flag">이전 결과</span><span class="grow">신고서를 고쳤어요. '지름신 퇴치하기'를 다시 누르면 고친 내용으로 분석해요.</span>`,
   };
+  el.dataset.kind = T[kind] ? kind : 'local';
   el.innerHTML = T[kind] || T.local;
 }
 
@@ -2279,6 +2290,7 @@ function fillForm(x) {
   exFill = { item: x.item, price: $('#price').value, type: x.type || 'auto', reasons: [...(x.reasons || [])].sort().join(), since: x.since || 'days', similar: !!x.similar };
   priceOk = null;
   $('#ex-note').hidden = true;
+  clearItemError();
   syncTypeUI();
 }
 // 예시와 다른 물건을 적기 시작하면, 예시의 가격·종류·이유가 남아 엉뚱한 분석이 나오지 않게 예시 값 그대로인 칸만 비우고 알린다
@@ -2343,6 +2355,18 @@ function checkPrice(inp) {
 function bindMoney(input) {
   input.addEventListener('input', () => { const n = digits(input.value); input.value = n ? comma(n) : ''; });
 }
+function clearItemError() {
+  const item = $('#item');
+  item.removeAttribute('aria-invalid'); item.removeAttribute('aria-describedby');
+  $('#item-err').hidden = true;
+}
+function markStale(ev) {
+  if (ev.target.id === 'ai-on' || !current || current.example) return;
+  const st = $('#status');
+  // Claude 분석이 도착하는 중이면 진행 안내를 덮지 않는다. 같은 안내를 거듭 읽어 주지 않게 한 번만 바꾼다.
+  if (!st || ['stale', 'ai-wait', 'ai-stream'].includes(st.dataset.kind)) return;
+  setStatus('stale');
+}
 function analyze(inp, opts = {}) {
   if (ai.ctl) ai.ctl.abort();
   if (ai.chatCtl) ai.chatCtl.abort();
@@ -2401,7 +2425,8 @@ function onWaitClick(ev) {
   if (act === 'remove' && !b.dataset.confirm) {
     b.dataset.confirm = '1'; b.textContent = '한 번 더 누르면 취소돼요';
     say('한 번 더 누르면 보류가 취소돼요.');
-    setTimeout(() => { if (b.isConnected) { delete b.dataset.confirm; b.textContent = '보류 취소'; } }, 3000);
+    // 확인 문구를 화면 읽기 프로그램으로 다 듣고 다시 누를 수 있게 넉넉히 기다린다
+    setTimeout(() => { if (b.isConnected) { delete b.dataset.confirm; b.textContent = '보류 취소'; } }, 8000);
     return;
   }
   track('wait_action', { action: act });
@@ -2488,7 +2513,7 @@ function onJarClick(ev) {
     if (!b.dataset.confirm) {
       b.dataset.confirm = '1'; b.textContent = '정말 지울까요?';
       say('한 번 더 누르면 기록이 지워져요.');
-      setTimeout(() => { if (b.isConnected) { delete b.dataset.confirm; b.textContent = '지우기'; } }, 3000);
+      setTimeout(() => { if (b.isConnected) { delete b.dataset.confirm; b.textContent = '지우기'; } }, 8000);
       return;
     }
     const li = b.closest('li'), id = li.dataset.id, key = li.dataset.kind === 'jar' ? 'jar' : 'bought';
@@ -2544,17 +2569,21 @@ function start() {
   bindMoney($('#price'));
   bindMoney($('#wage'));
   // 품목·종류·가격 중 하나라도 바꾸면, 앞서 확인받은 금액은 잊고 다음 제출 때 다시 본다
-  $('#item').addEventListener('input', () => { $('#item').removeAttribute('aria-invalid'); priceOk = null; clearExample(); syncTypeUI(); });
+  $('#item').addEventListener('input', () => { clearItemError(); priceOk = null; clearExample(); syncTypeUI(); });
   // 품목을 다 적고 나왔을 때 고른 종류와 맞지 않으면 화면 읽기 프로그램에도 알린다
   $('#item').addEventListener('change', () => { if (typeNote) say(typeNote); });
   $('#price').addEventListener('input', () => { priceOk = null; if ($('#price-hint').classList.contains('is-check')) syncTypeUI(); });
   $('#type-seg').addEventListener('change', () => { priceOk = null; syncTypeUI(); });
+  // 결과를 낸 뒤 신고서를 고치면, 아래 결과가 고치기 전 입력으로 낸 것임을 알린다
+  $('#form').addEventListener('input', markStale);
+  $('#form').addEventListener('change', markStale);
   $('#type-hint').addEventListener('click', ev => {
     const b = ev.target.closest('[data-type]');
     if (!b) return;
     const r = $(`input[name="type"][value="${b.dataset.type}"]`);
     r.checked = true;
     priceOk = null;
+    markStale({ target: r }); // 코드로 바꾼 선택은 change가 오지 않으니 직접 알린다
     syncTypeUI();
     r.focus(); // 누른 링크가 사라지니 포커스를 새로 고른 종류로 옮긴다
   });
@@ -2569,8 +2598,11 @@ function start() {
     ev.preventDefault();
     const inp = readForm();
     if (!inp.item) {
-      $('#item').setAttribute('aria-invalid', 'true'); $('#item').focus();
-      toast('무엇을 사고 싶은지 먼저 적어 주세요.');
+      // 알림은 몇 초 뒤 사라지니, 오류 문장을 입력칸 아래에 남기고 입력칸의 설명으로 이어 둔다
+      const item = $('#item');
+      item.setAttribute('aria-invalid', 'true'); item.setAttribute('aria-describedby', 'item-err');
+      $('#item-err').hidden = false;
+      item.focus();
       return;
     }
     if (!checkPrice(inp)) return;
@@ -2653,7 +2685,7 @@ function start() {
   });
   window.addEventListener('hashchange', () => showView(location.hash.slice(1)));
   let rz = 0;
-  window.addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(() => current && drawCrowd(current, false), 150); });
+  window.addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(() => { if (current) { drawCrowd(current, false); renderCurve(current); } }, 150); });
   const mq = window.matchMedia && matchMedia('(prefers-color-scheme: dark)');
   if (mq && mq.addEventListener) mq.addEventListener('change', () => current && drawCrowd(current, false));
   new MutationObserver(() => current && drawCrowd(current, false)).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });

@@ -33,7 +33,9 @@ function setStatus(kind, info, retry) {
     'ai-off': '<span class="grow">Claude를 쓸 수 없어서 기본 추정으로 보여 드려요.</span>',
     'ai-empty': '<span class="grow">Claude의 답을 읽지 못해서 기본 추정으로 보여 드려요.</span><button class="btn btn-sm" type="button" data-act="retry">다시 시도</button>',
     'ai-error': `<span class="grow">${esc(info)}</span>${retry ? '<button class="btn btn-sm" type="button" data-act="retry">다시 시도</button>' : ''}`,
+    stale: `<span class="flag">이전 결과</span><span class="grow">신고서를 고쳤어요. '지름신 퇴치하기'를 다시 누르면 고친 내용으로 분석해요.</span>`,
   };
+  el.dataset.kind = T[kind] ? kind : 'local';
   el.innerHTML = T[kind] || T.local;
 }
 

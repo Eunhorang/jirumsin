@@ -111,6 +111,7 @@ p { margin: 0; }
 button, input, select, textarea { font: inherit; color: inherit; }
 button { cursor: pointer; }
 :focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+::selection { background: var(--mark); color: var(--ink); }
 h2[tabindex="-1"]:focus { outline: none; }
 .wrap { max-width: 1120px; margin-inline: auto; }
 .num { font-variant-numeric: tabular-nums; }
@@ -142,7 +143,7 @@ h2[tabindex="-1"]:focus { outline: none; }
 .tab[aria-selected="true"] { background: var(--paper); color: var(--ink); box-shadow: 0 1px 2px rgba(0, 0, 0, .08); }
 .tab .badge {
   min-width: 20px; padding: 0 6px; border-radius: 999px;
-  background: var(--red); color: var(--on-red); font-size: .72rem; line-height: 20px; text-align: center;
+  background: var(--red); color: var(--on-red); font-size: var(--t-xs); line-height: 20px; text-align: center;
 }
 .tab .badge.save { background: var(--save); color: var(--paper); }
 .tab .badge:empty { display: none; }
@@ -199,7 +200,7 @@ input::placeholder, textarea::placeholder { color: var(--ink-3); opacity: 1; }
 .examples { display: flex; flex-wrap: wrap; gap: 6px; }
 .ex {
   border: 1px dashed var(--rule); background: transparent; color: var(--ink-2);
-  padding: 4px 10px; border-radius: 4px; font-size: var(--t-xs);
+  padding: 6px 12px; border-radius: var(--r-sm); font-size: var(--t-xs);
 }
 .ex:hover { border-color: var(--ink-3); color: var(--ink); background: var(--paper-2); }
 
@@ -219,6 +220,7 @@ input::placeholder, textarea::placeholder { color: var(--ink-3); opacity: 1; }
 .pick input:focus-visible + span { outline: 2px solid var(--focus); outline-offset: 2px; }
 .pick.is-need input:checked + span { background: var(--save); border-color: var(--save); color: var(--paper); }
 .check { display: flex; align-items: center; gap: 8px; font-size: var(--t-sm); color: var(--ink-2); cursor: pointer; }
+.field > .check { padding-block: 8px; margin-block: -8px; } /* 줄 간격은 그대로 두고 누르는 자리만 넓힌다 */
 .check input { width: 18px; height: 18px; accent-color: var(--ink); margin: 0; }
 .wage { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-size: var(--t-sm); color: var(--ink-2); }
 

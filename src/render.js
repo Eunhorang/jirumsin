@@ -44,7 +44,6 @@ function renderVerdict(a, hit) {
   <div class="charm">
     <div class="stamp${hit ? ' hit' : ''}" aria-hidden="true">${esc(L.stamp).replace('\n', '<br>')}</div>
     <div class="charm-body">
-      <p class="eyebrow">지름신 판정 · ${esc(TYPE_NAME[a.type])}</p>
       <h2 tabindex="-1">${esc(L.head)}</h2>
       <p class="line">${esc(a.line)}</p>
       <div class="meter" role="img" aria-label="충동 지수 100점 만점에 ${a.score}점">
@@ -74,7 +73,7 @@ function renderOwn(a, animate) {
     const ask = !o.basic ? '' : a.input.similar ? ' 비슷한 걸 이미 가지고 있다고 했어요. 지금 것으로 충분한지 먼저 보세요.' : ' 지금 가진 것 가운데 비슷한 게 있는지부터 떠올려 보세요.';
     $('#sec-own').innerHTML = `
   <section class="own" aria-labelledby="own-h">
-    <div class="sec-h"><p class="eyebrow" id="own-h">전 세계 보유율 추정</p>${srcBadge(a, 'own')}</div>
+    <div class="sec-h"><h3 class="eyebrow" id="own-h">전 세계 보유율 추정</h3>${srcBadge(a, 'own')}</div>
     <p class="own-sub">${esc(o.note + ask)}</p>
     <p class="basis">근거 · ${esc(o.basis)}</p>
   </section>`;
@@ -89,7 +88,7 @@ function renderOwn(a, animate) {
   const broad = o.broad && o.ref ? ` <span class="hint">(${esc(o.ref)} 전체 기준)</span>` : '';
   $('#sec-own').innerHTML = `
   <section class="own" aria-labelledby="own-h">
-    <div class="sec-h"><p class="eyebrow" id="own-h">전 세계 보유율 추정</p>${srcBadge(a, 'own')}</div>
+    <div class="sec-h"><h3 class="eyebrow" id="own-h">전 세계 보유율 추정</h3>${srcBadge(a, 'own')}</div>
     <div class="own-head">
       <div class="own-big"><span class="n num">${fmtPct(o.pct)}</span><span class="u">%</span></div>
       <p class="own-sub">${ownSentence(a)}${broad}</p>
@@ -228,11 +227,11 @@ function renderReceipt(a) {
   const body = receiptRows(a).map(([k, ...x]) => html[k](...x)).join('');
   $('#sec-receipt').innerHTML = `
     <div class="receipt">
-      <p class="rc-title">결제 전 영수증</p>
+      <h3 class="rc-title">결제 전 영수증</h3>
       <p class="rc-meta">지름신 퇴치소 · No.${receiptNo(a)} · ${nowStamp()}</p>
-      <hr class="rc-rule"><div class="rc-item">품목 · ${esc(a.name)}</div><hr class="rc-rule">${body}
+      <hr class="rc-rule"><div class="rc-item">품목 · ${esc(a.name)}</div><div class="rc-kind">분류 · ${esc(TYPE_NAME[a.type])}</div><hr class="rc-rule">${body}
       <div class="barcode">${barcode(a.name)}</div>
-      <p class="rc-foot">이 영수증은 결제되지 않았습니다.<br>참으면 ${krw(saveAmount(a))}을 지켜요.</p>
+      <p class="rc-foot">이 영수증은 결제되지 않았습니다.<br><b>참으면 ${krw(saveAmount(a))}을 지켜요.</b></p>
     </div>
     <button class="btn rc-share" type="button" data-act="card">영수증 이미지로 저장·공유</button>
     ${swapHTML(a.type === 'sub' ? m.y1 : m.base, a.type === 'sub' ? '1년 구독료면' : '이 돈이면')}`;
@@ -249,7 +248,7 @@ function renderPsych(a) {
     <div class="sec-h"><h3>지금 당신의 지름신은</h3>${srcBadge(a, 'psych')}</div>
     ${a.level.key === 'ok' ? '' : `<p class="want">사실 원하는 건 ${esc(a.name)}보다 <mark>${esc(a.want)}</mark>일지도 몰라요.</p>`}
     <ul class="psy">${a.psych.map(p => `
-      <li><div class="psy-top"><b>${esc(p.n)}</b><span>${p.s}</span></div>
+      <li><div class="psy-top"><b>${esc(p.n)}</b><span>${p.s}점</span></div>
         <div class="bar" role="img" aria-label="${esc(p.n)} 100점 만점에 ${p.s}점"><i class="${p.s >= 60 ? 'hot' : ''}" style="width:${p.s}%"></i></div>
         <p>${esc(p.d)}</p></li>`).join('')}</ul>`;
 }
@@ -259,8 +258,9 @@ function renderReasons(a) {
     <div class="sec-h"><h3>${well ? '잘 사는 법' : a.level.key === 'ok' ? '사기 전에 따져 볼 점' : '사면 안 되는 이유'}</h3>${well ? '<span class="src">기본 추정</span>' : srcBadge(a, 'reasons')}</div>
     <ol class="reasons${well ? ' is-ok' : ''}">${reasonList(a).map(r => `<li><h4>${esc(r.t)}</h4><p>${esc(r.d)}</p></li>`).join('')}</ol>`;
 }
-function curveSVG(thrill) {
-  const W = 640, H = 230, L = 20, Rr = 20, T = 30, B = 40, span = Math.max(60, Math.round(thrill * 3)), tau = thrill / 2.3;
+// W는 그래프가 실제로 그려질 폭이다. 640으로 그려 휴대폰에서 줄이면 글자가 7px쯤으로 작아져서, 좁은 화면에서는 그 폭으로 다시 그린다.
+function curveSVG(thrill, W = 640) {
+  const H = W < 560 ? 190 : 230, L = 20, Rr = 20, T = 30, B = 40, span = Math.max(60, Math.round(thrill * 3)), tau = thrill / 2.3;
   const f = t => .22 + .72 * Math.exp(-t / tau);
   const x = t => L + (t / span) * (W - L - Rr), y = v => T + (1 - v) * (H - T - B);
   let d = '';
@@ -301,7 +301,8 @@ function renderCurve(a) {
   const note = a.type === 'exp' ? '경험은 물건보다 만족이 오래가는 편이에요. 다만 할부라면 설렘이 끝난 뒤에도 결제는 계속돼요.'
     : a.type === 'sub' ? '구독은 처음 며칠 몰아 쓰고 나면 손이 덜 가기 쉬워요. 그래도 결제는 매달 똑같이 나가요.'
     : `새것의 기쁨은 보통 몇 주 안에 익숙해져요. ${t}일쯤 지나면 이 물건은 '원래 있던 물건'이 돼요.`;
-  el.innerHTML = `<div class="sec-h"><h3>설렘 유통기한</h3>${srcBadge(a, 'cost')}</div><div class="curve">${curveSVG(t)}</div><p class="curve-note">${esc(note)}</p>`;
+  const W = clamp(Math.round(el.clientWidth || innerWidth - 32), 320, 640); // 다른 탭이 열려 있어 폭이 0이면 화면 폭으로 어림한다
+  el.innerHTML = `<div class="sec-h"><h3>설렘 유통기한</h3>${srcBadge(a, 'cost')}</div><div class="curve">${curveSVG(t, W)}</div><p class="curve-note">${esc(note)}</p>`;
 }
 function renderAlts(a) {
   $('#sec-alts').innerHTML = `

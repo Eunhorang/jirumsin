@@ -121,7 +121,7 @@ function ownership(m, price) {
   }
   const g = ownGuess(m.type, price);
   return { ...g, kr: null, conf: '낮음', ref: null, broad: true,
-    basis: '사전에 없는 품목이라 가격대가 비슷한 물건의 보급률로 어림했어요. Claude 정밀 분석을 켜면 더 정확해져요.' };
+    basis: '사전에 없는 품목이라 가격대가 비슷한 물건의 보급률로 어림했어요.' };
 }
 
 /* ── 돈 계산 ────────────────────────────── */
