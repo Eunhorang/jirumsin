@@ -1,0 +1,549 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-01T11:24:58+00:00",
+  "title": "Design System: 지름신 퇴치소",
+  "extensions": {
+    "colorMeta": {
+      "red": {
+        "role": "primary",
+        "displayName": "인주 빨강",
+        "canonical": "#C42A20",
+        "dark": "#FF5D50",
+        "tonalRamp": [
+          "#1F0000",
+          "#4C0302",
+          "#810101",
+          "#B5150F",
+          "#DA4A3C",
+          "#F67B6B",
+          "#FFB3A8",
+          "#FEE9E5"
+        ]
+      },
+      "on-red": {
+        "role": "primary",
+        "displayName": "빨강 위 글자",
+        "canonical": "#FFFFFF",
+        "dark": "#1B0A08",
+        "tonalRamp": [
+          "#0B0B0B",
+          "#252525",
+          "#424242",
+          "#616161",
+          "#828282",
+          "#A5A5A5",
+          "#C9C9C9",
+          "#EEEEEE"
+        ]
+      },
+      "charm": {
+        "role": "secondary",
+        "displayName": "괴황지 노랑",
+        "canonical": "#F2D04B",
+        "dark": "#DDBB3B",
+        "tonalRamp": [
+          "#0F0B00",
+          "#2E2400",
+          "#4F4101",
+          "#746002",
+          "#9A8004",
+          "#BEA440",
+          "#DAC98A",
+          "#F4EFD9"
+        ]
+      },
+      "charm-ink": {
+        "role": "secondary",
+        "displayName": "부적 먹색",
+        "canonical": "#2A1708",
+        "dark": "#24140A",
+        "tonalRamp": [
+          "#120904",
+          "#312116",
+          "#513D2E",
+          "#735C4B",
+          "#947D6C",
+          "#B5A192",
+          "#D5C6BC",
+          "#F3EDEA"
+        ]
+      },
+      "charm-red": {
+        "role": "secondary",
+        "displayName": "부적 주사 빨강",
+        "canonical": "#AE2219",
+        "dark": "#A4201A",
+        "tonalRamp": [
+          "#1F0000",
+          "#4D0101",
+          "#7F0704",
+          "#B0241B",
+          "#D45142",
+          "#F17F70",
+          "#FDB4A8",
+          "#FFE9E5"
+        ]
+      },
+      "save": {
+        "role": "tertiary",
+        "displayName": "저금 초록",
+        "canonical": "#18734C",
+        "dark": "#4FC38E",
+        "tonalRamp": [
+          "#000F06",
+          "#012D1A",
+          "#054F32",
+          "#18734C",
+          "#46946D",
+          "#76B593",
+          "#AAD5BC",
+          "#E4F3EA"
+        ]
+      },
+      "mark": {
+        "role": "tertiary",
+        "displayName": "형광펜 노랑",
+        "canonical": "#FFE36B",
+        "dark": "rgba(255, 212, 64, .32)",
+        "tonalRamp": [
+          "#0F0B00",
+          "#2D2500",
+          "#4E4103",
+          "#726006",
+          "#98810B",
+          "#BAA549",
+          "#D8CA8F",
+          "#F3EFDB"
+        ]
+      },
+      "focus": {
+        "role": "tertiary",
+        "displayName": "초점 파랑",
+        "canonical": "#2D6BEA",
+        "dark": "#82A8FF",
+        "tonalRamp": [
+          "#00062A",
+          "#011D5F",
+          "#04359B",
+          "#1754D2",
+          "#3E7AF4",
+          "#75A3FC",
+          "#AECAFD",
+          "#E6EFFF"
+        ]
+      },
+      "ground": {
+        "role": "neutral",
+        "displayName": "계산대 회색",
+        "canonical": "#E5E8EC",
+        "dark": "#111317",
+        "tonalRamp": [
+          "#0A0B0C",
+          "#232527",
+          "#404245",
+          "#5F6165",
+          "#808286",
+          "#A3A5A8",
+          "#C8C9CB",
+          "#EEEEEF"
+        ]
+      },
+      "ground-2": {
+        "role": "neutral",
+        "displayName": "계산대 그늘",
+        "canonical": "#D8DCE2",
+        "dark": "#1A1D23",
+        "tonalRamp": [
+          "#0A0B0D",
+          "#232529",
+          "#3F4247",
+          "#5E6167",
+          "#7F8388",
+          "#A2A5AA",
+          "#C7C9CC",
+          "#EEEEF0"
+        ]
+      },
+      "track": {
+        "role": "neutral",
+        "displayName": "막대 빈 칸",
+        "canonical": "#D8DCE2",
+        "dark": "#353B45",
+        "tonalRamp": [
+          "#0A0B0D",
+          "#232529",
+          "#3F4247",
+          "#5E6167",
+          "#7F8388",
+          "#A2A5AA",
+          "#C7C9CC",
+          "#EEEEF0"
+        ]
+      },
+      "paper": {
+        "role": "neutral",
+        "displayName": "영수증 종이",
+        "canonical": "#FFFFFF",
+        "dark": "#1C1F26",
+        "tonalRamp": [
+          "#0B0B0B",
+          "#252525",
+          "#424242",
+          "#616161",
+          "#828282",
+          "#A5A5A5",
+          "#C9C9C9",
+          "#EEEEEE"
+        ]
+      },
+      "paper-2": {
+        "role": "neutral",
+        "displayName": "종이 그늘",
+        "canonical": "#F3F5F7",
+        "dark": "#252930",
+        "tonalRamp": [
+          "#0B0B0C",
+          "#242526",
+          "#414244",
+          "#606163",
+          "#818284",
+          "#A4A5A7",
+          "#C8C9CA",
+          "#EEEEEF"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "먹색",
+        "canonical": "#1A1D24",
+        "dark": "#ECEDEF",
+        "tonalRamp": [
+          "#0A0B0E",
+          "#23252B",
+          "#3F4249",
+          "#5D616A",
+          "#7F828B",
+          "#A2A5AC",
+          "#C7C9CE",
+          "#EDEEF0"
+        ]
+      },
+      "ink-2": {
+        "role": "neutral",
+        "displayName": "연한 먹",
+        "canonical": "#4C5361",
+        "dark": "#B2B7C0",
+        "tonalRamp": [
+          "#090B11",
+          "#20252F",
+          "#3C424F",
+          "#5A6170",
+          "#7B8291",
+          "#9FA5B2",
+          "#C5C9D2",
+          "#EDEEF2"
+        ]
+      },
+      "ink-3": {
+        "role": "neutral",
+        "displayName": "더 연한 먹",
+        "canonical": "#5F6673",
+        "dark": "#8E95A0",
+        "tonalRamp": [
+          "#090B10",
+          "#21252E",
+          "#3C424E",
+          "#5B616E",
+          "#7C8390",
+          "#9FA5B1",
+          "#C5C9D1",
+          "#EDEEF1"
+        ]
+      },
+      "rule": {
+        "role": "neutral",
+        "displayName": "괘선",
+        "canonical": "#D2D6DD",
+        "dark": "#323740",
+        "tonalRamp": [
+          "#0A0B0D",
+          "#232529",
+          "#3F4247",
+          "#5E6167",
+          "#7F8289",
+          "#A2A5AA",
+          "#C7C9CD",
+          "#EEEEF0"
+        ]
+      },
+      "field": {
+        "role": "neutral",
+        "displayName": "입력칸 테두리",
+        "canonical": "#7C838F",
+        "dark": "#6B7280",
+        "tonalRamp": [
+          "#090B10",
+          "#21252D",
+          "#3C424C",
+          "#5B626D",
+          "#7C838E",
+          "#9FA5AF",
+          "#C5C9D0",
+          "#EDEEF1"
+        ]
+      },
+      "dot": {
+        "role": "neutral",
+        "displayName": "군중 점",
+        "canonical": "#C4C9D1",
+        "dark": "#3A4049",
+        "tonalRamp": [
+          "#0A0B0E",
+          "#22252A",
+          "#3E4248",
+          "#5D6168",
+          "#7E838A",
+          "#A1A5AB",
+          "#C6C9CE",
+          "#EDEEF0"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "표제",
+        "purpose": "첫 화면 제목과 세계 보유율 큰 숫자."
+      },
+      "headline": {
+        "displayName": "판정 문장",
+        "purpose": "부적의 판정 문장, 보류함·저금통 제목."
+      },
+      "title": {
+        "displayName": "섹션 제목",
+        "purpose": "지름 신고서와 결과 섹션 제목. 주 버튼도 같은 글꼴(1.1875rem)."
+      },
+      "body": {
+        "displayName": "본문",
+        "purpose": "설명과 본문. word-break: keep-all."
+      },
+      "label": {
+        "displayName": "항목 이름",
+        "purpose": "입력 항목 이름과 기본 버튼."
+      },
+      "mono": {
+        "displayName": "영수증 숫자",
+        "purpose": "영수증 본문, 금액 입력칸, 보류 시계, 장부 금액."
+      },
+      "hand": {
+        "displayName": "손글씨",
+        "purpose": "1년 뒤의 나에게서 온 편지 전용."
+      }
+    },
+    "shadows": [
+      {
+        "name": "paper",
+        "value": "0 1px 0 rgba(26, 29, 36, .05), 0 12px 30px -16px rgba(26, 29, 36, .38)",
+        "purpose": "위에 놓인 종이 서류(신고서, 카드, 부적, 영수증, 편지, 결정 바)."
+      },
+      {
+        "name": "paper-dark",
+        "value": "0 1px 0 rgba(0, 0, 0, .3), 0 14px 32px -16px rgba(0, 0, 0, .75)",
+        "purpose": "어두운 모드의 종이 그림자."
+      },
+      {
+        "name": "tab-selected",
+        "value": "0 1px 2px rgba(0, 0, 0, .08)",
+        "purpose": "탭 묶음 안의 선택된 탭."
+      }
+    ],
+    "motion": [
+      {
+        "name": "stamp-in",
+        "value": ".45s cubic-bezier(.2, .9, .3, 1.25)",
+        "purpose": "판정 도장이 크게 찍혔다가 제자리에 앉는다."
+      },
+      {
+        "name": "state",
+        "value": ".15s",
+        "purpose": "테두리·바탕·글자 색 바뀜."
+      },
+      {
+        "name": "press",
+        "value": ".1s",
+        "purpose": "버튼을 누르면 1px 아래로."
+      },
+      {
+        "name": "fill",
+        "value": ".6s ease",
+        "purpose": "충동 지수·심리 막대 채우기."
+      },
+      {
+        "name": "coin",
+        "value": ".9s ease-in",
+        "purpose": "저금통에 동전이 떨어진다."
+      },
+      {
+        "name": "toast",
+        "value": ".25s",
+        "purpose": "알림이 아래에서 떠오른다."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "prefers-reduced-motion: reduce → 애니메이션·전환 .01ms",
+        "purpose": "움직임 줄이기 설정에서는 사실상 끈다."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "phone-narrow",
+        "value": "520px"
+      },
+      {
+        "name": "phone",
+        "value": "560px"
+      },
+      {
+        "name": "jar",
+        "value": "600px"
+      },
+      {
+        "name": "form-row",
+        "value": "760px"
+      },
+      {
+        "name": "result-two-column",
+        "value": "941px"
+      },
+      {
+        "name": "sticky-receipt-height",
+        "value": "980px (min-height)"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "주 버튼",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "'지름신 퇴치하기'. 인주 빨강에 표제 글꼴, 한 화면에 하나.",
+      "html": "<button class=\"ds-btn-primary\" type=\"button\">지름신 퇴치하기</button>",
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; justify-content: center; background: var(--red, #C42A20); color: var(--on-red, #FFFFFF); border: 1.5px solid var(--red, #C42A20); border-radius: 6px; padding: 12px 26px; font-family: \"Black Han Sans\", \"Apple SD Gothic Neo\", \"Malgun Gothic\", sans-serif; font-weight: 400; font-size: 1.1875rem; letter-spacing: .01em; cursor: pointer; transition: transform .1s, filter .15s; } .ds-btn-primary:hover { filter: brightness(1.06); } .ds-btn-primary:active { transform: translateY(1px); } .ds-btn-primary:focus-visible { outline: 2px solid var(--focus, #2D6BEA); outline-offset: 2px; }"
+    },
+    {
+      "name": "기본 버튼",
+      "kind": "button",
+      "refersTo": "button",
+      "description": "먹색 테두리의 종이 버튼. 결과 복사, 보류함에 넣기 등.",
+      "html": "<button class=\"ds-btn\" type=\"button\">결과 복사</button>",
+      "css": ".ds-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: var(--paper, #FFFFFF); color: var(--ink, #1A1D24); border: 1.5px solid var(--ink, #1A1D24); border-radius: 6px; padding: 10px 18px; font-family: \"IBM Plex Sans KR\", \"Apple SD Gothic Neo\", \"Malgun Gothic\", system-ui, sans-serif; font-weight: 700; font-size: .875rem; cursor: pointer; transition: transform .1s, background .15s; } .ds-btn:hover { background: var(--paper-2, #F3F5F7); } .ds-btn:active { transform: translateY(1px); } .ds-btn:focus-visible { outline: 2px solid var(--focus, #2D6BEA); outline-offset: 2px; }"
+    },
+    {
+      "name": "저금 버튼",
+      "kind": "button",
+      "refersTo": "button-save",
+      "description": "'참았어요'처럼 지킨 결정을 기록하는 초록 버튼.",
+      "html": "<button class=\"ds-btn-save\" type=\"button\">참았어요</button>",
+      "css": ".ds-btn-save { display: inline-flex; align-items: center; justify-content: center; background: var(--save, #18734C); color: var(--paper, #FFFFFF); border: 1.5px solid var(--save, #18734C); border-radius: 6px; padding: 10px 18px; font-family: \"IBM Plex Sans KR\", \"Apple SD Gothic Neo\", \"Malgun Gothic\", system-ui, sans-serif; font-weight: 700; font-size: .875rem; cursor: pointer; transition: transform .1s, filter .15s; } .ds-btn-save:hover { filter: brightness(1.06); } .ds-btn-save:active { transform: translateY(1px); } .ds-btn-save:focus-visible { outline: 2px solid var(--focus, #2D6BEA); outline-offset: 2px; }"
+    },
+    {
+      "name": "품목 입력칸",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "지름 신고서의 첫 칸. 크게 쓰고, 초점이 오면 테두리가 먹색으로.",
+      "html": "<input class=\"ds-input-item\" type=\"text\" placeholder=\"예: 아이폰, 넷플릭스, 롤렉스, 테슬라 주식\" aria-label=\"무엇을 사고 싶나요?\">",
+      "css": ".ds-input-item { width: min(100%, 420px); background: var(--paper-2, #F3F5F7); color: var(--ink, #1A1D24); border: 1.5px solid var(--field, #7C838F); border-radius: 6px; padding: 13px 15px; font-family: \"IBM Plex Sans KR\", \"Apple SD Gothic Neo\", \"Malgun Gothic\", system-ui, sans-serif; font-size: 1.5rem; font-weight: 600; transition: border-color .15s, background .15s; } .ds-input-item::placeholder { color: var(--ink-3, #5F6673); font-size: 1.1875rem; font-weight: 400; opacity: 1; } .ds-input-item:hover { border-color: var(--ink-2, #4C5361); } .ds-input-item:focus { outline: none; border-color: var(--ink, #1A1D24); background: var(--paper, #FFFFFF); }"
+    },
+    {
+      "name": "이유 칩",
+      "kind": "chip",
+      "refersTo": "chip",
+      "description": "여러 개 고르는 알약. 선택은 먹색, '꼭 필요해서'만 초록.",
+      "html": "<div class=\"ds-chips\"><label class=\"ds-pick\"><input type=\"checkbox\"><span>할인·특가라서</span></label><label class=\"ds-pick\"><input type=\"checkbox\" checked><span>나에게 주는 보상</span></label><label class=\"ds-pick ds-is-need\"><input type=\"checkbox\" checked><span>꼭 필요해서</span></label></div>",
+      "css": ".ds-chips { display: flex; flex-wrap: wrap; gap: 8px; font-family: \"IBM Plex Sans KR\", \"Apple SD Gothic Neo\", \"Malgun Gothic\", system-ui, sans-serif; } .ds-pick { position: relative; display: inline-flex; } .ds-pick input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; } .ds-pick span { display: inline-flex; align-items: center; border: 1.5px solid var(--rule, #D2D6DD); border-radius: 999px; padding: 6px 13px; font-size: .875rem; font-weight: 500; color: var(--ink-2, #4C5361); background: var(--paper, #FFFFFF); transition: background .15s, color .15s, border-color .15s; } .ds-pick:hover span { border-color: var(--ink-3, #5F6673); color: var(--ink, #1A1D24); } .ds-pick input:checked + span { background: var(--ink, #1A1D24); border-color: var(--ink, #1A1D24); color: var(--paper, #FFFFFF); } .ds-pick.ds-is-need input:checked + span { background: var(--save, #18734C); border-color: var(--save, #18734C); } .ds-pick input:focus-visible + span { outline: 2px solid var(--focus, #2D6BEA); outline-offset: 2px; }"
+    },
+    {
+      "name": "탭",
+      "kind": "nav",
+      "refersTo": "tab-selected",
+      "description": "분석·보류함·저금통. 회색 알약 안에서 선택된 탭만 종이처럼 뜬다.",
+      "html": "<nav class=\"ds-tabs\" role=\"tablist\" aria-label=\"화면 선택\"><button class=\"ds-tab\" role=\"tab\" aria-selected=\"true\" type=\"button\">분석</button><button class=\"ds-tab\" role=\"tab\" aria-selected=\"false\" type=\"button\">보류함 <span class=\"ds-badge\">2</span></button><button class=\"ds-tab\" role=\"tab\" aria-selected=\"false\" type=\"button\">저금통 <span class=\"ds-badge ds-badge-save\">3</span></button></nav>",
+      "css": ".ds-tabs { display: inline-flex; gap: 4px; padding: 4px; background: var(--ground-2, #D8DCE2); border-radius: 999px; font-family: \"IBM Plex Sans KR\", \"Apple SD Gothic Neo\", \"Malgun Gothic\", system-ui, sans-serif; } .ds-tab { display: inline-flex; align-items: center; gap: 6px; border: 0; background: transparent; color: var(--ink-2, #4C5361); padding: 7px 14px; border-radius: 999px; font-weight: 600; font-size: .875rem; white-space: nowrap; cursor: pointer; } .ds-tab:hover { color: var(--ink, #1A1D24); } .ds-tab[aria-selected=\"true\"] { background: var(--paper, #FFFFFF); color: var(--ink, #1A1D24); box-shadow: 0 1px 2px rgba(0, 0, 0, .08); } .ds-tab:focus-visible { outline: 2px solid var(--focus, #2D6BEA); outline-offset: 2px; } .ds-badge { min-width: 20px; padding: 0 6px; border-radius: 999px; background: var(--red, #C42A20); color: var(--on-red, #FFFFFF); font-size: .72rem; line-height: 20px; text-align: center; } .ds-badge-save { background: var(--save, #18734C); color: var(--paper, #FFFFFF); }"
+    },
+    {
+      "name": "판정 부적",
+      "kind": "custom",
+      "refersTo": "charm",
+      "description": "결과의 첫 자리. 괴황지 노랑 종이에 기울어진 판정 도장과 충동 지수.",
+      "html": "<div class=\"ds-charm\"><div class=\"ds-stamp\">결제<br>중지</div><div class=\"ds-charm-body\"><p class=\"ds-charm-eyebrow\">지름신 판정 · 물건</p><h2 class=\"ds-charm-h\">지름신이 강림했어요</h2><p class=\"ds-charm-line\">오늘은 결제 버튼에서 손을 떼세요.</p><div class=\"ds-meter\"><div class=\"ds-meter-top\"><span>충동 지수</span><b>80</b></div><div class=\"ds-meter-track\"><i style=\"width: 80%\"></i></div></div></div></div>",
+      "css": ".ds-charm { position: relative; max-width: 560px; word-break: keep-all; overflow-wrap: anywhere;background: var(--charm, #F2D04B); color: var(--charm-ink, #2A1708); border-radius: 3px; box-shadow: 0 1px 0 rgba(26, 29, 36, .05), 0 12px 30px -16px rgba(26, 29, 36, .38); padding: 26px 24px 24px; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 18px 26px; align-items: center; font-family: \"IBM Plex Sans KR\", \"Apple SD Gothic Neo\", \"Malgun Gothic\", system-ui, sans-serif; } .ds-charm::before { content: \"\"; position: absolute; inset: 8px; pointer-events: none; border: 1.5px solid var(--charm-red, #AE2219); opacity: .5; } .ds-stamp { font-family: \"Black Han Sans\", \"Apple SD Gothic Neo\", \"Malgun Gothic\", sans-serif; color: var(--charm-red, #AE2219); border: 4px solid var(--charm-red, #AE2219); border-radius: 9px; box-shadow: inset 0 0 0 3px var(--charm, #F2D04B), inset 0 0 0 5px var(--charm-red, #AE2219); padding: 12px 14px; min-width: 6.2em; text-align: center; font-size: 1.9rem; line-height: 1.05; transform: rotate(-7deg); } .ds-charm-body { display: grid; gap: 10px; min-width: 0; } .ds-charm-eyebrow { margin: 0; font-size: .78rem; font-weight: 700; letter-spacing: .06em; opacity: .7; } .ds-charm-h { margin: 0; font-family: \"Black Han Sans\", \"Apple SD Gothic Neo\", \"Malgun Gothic\", sans-serif; font-weight: 400; font-size: 2rem; line-height: 1.2; } .ds-charm-line { margin: 0; font-size: 1.1875rem; font-weight: 500; } .ds-meter { display: grid; gap: 6px; margin-top: 4px; } .ds-meter-top { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; font-weight: 700; font-size: .875rem; } .ds-meter-top b { font-family: \"Black Han Sans\", \"Apple SD Gothic Neo\", \"Malgun Gothic\", sans-serif; font-weight: 400; font-size: 1.6rem; color: var(--charm-red, #AE2219); } .ds-meter-track { position: relative; height: 12px; border-radius: 999px; background: rgba(42, 23, 8, .14); overflow: hidden; } .ds-meter-track i { position: absolute; inset: 0 auto 0 0; background: var(--charm-red, #AE2219); border-radius: 999px; }"
+    },
+    {
+      "name": "결제 전 영수증",
+      "kind": "custom",
+      "refersTo": "receipt",
+      "description": "고정폭 숫자, 점 리더, 형광펜 강조, 톱니로 찢긴 아래 가장자리.",
+      "html": "<div class=\"ds-receipt\"><p class=\"ds-rc-title\">결제 전 영수증</p><p class=\"ds-rc-meta\">지름신 퇴치소 · No.0001</p><hr class=\"ds-rc-rule\"><div class=\"ds-rc-line\"><span>판매가</span><i></i><span class=\"ds-rc-v\">1,790,000</span></div><div class=\"ds-rc-line\"><span>숨은 비용(3년)</span><i></i><span class=\"ds-rc-v\">+268,500</span></div><div class=\"ds-rc-line ds-rc-minus\"><span>3년 뒤 되팔면</span><i></i><span class=\"ds-rc-v\">−744,640</span></div><hr class=\"ds-rc-rule ds-rc-double\"><div class=\"ds-rc-line ds-rc-grand\"><span>실제로 사라지는 돈</span><i></i><span class=\"ds-rc-v\">1,313,860</span></div><p class=\"ds-rc-foot\">이 영수증은 결제되지 않았습니다.</p></div>",
+      "css": ".ds-receipt { position: relative; max-width: 360px; word-break: keep-all; overflow-wrap: anywhere;background: var(--paper, #FFFFFF); color: var(--ink, #1A1D24); font-family: \"Nanum Gothic Coding\", ui-monospace, \"SFMono-Regular\", Menlo, monospace; font-size: .86rem; line-height: 1.6; padding: 24px 20px 26px; margin-bottom: 12px; box-shadow: 0 1px 0 rgba(26, 29, 36, .05), 0 12px 30px -16px rgba(26, 29, 36, .38); } .ds-receipt::after { content: \"\"; position: absolute; left: 0; right: 0; bottom: -12px; height: 12px; background: linear-gradient(135deg, var(--paper, #FFFFFF) 50%, transparent 50%) 0 0 / 14px 12px repeat-x, linear-gradient(225deg, var(--paper, #FFFFFF) 50%, transparent 50%) 0 0 / 14px 12px repeat-x; } .ds-rc-title { margin: 0; text-align: center; font-weight: 700; font-size: 1.05rem; letter-spacing: .3em; } .ds-rc-meta { margin: 0; text-align: center; color: var(--ink-3, #5F6673); font-size: .74rem; } .ds-rc-rule { border: 0; border-top: 1px dashed var(--ink-3, #5F6673); margin: 10px 0; } .ds-rc-double { border-top: 3px double var(--ink, #1A1D24); } .ds-rc-line { display: flex; align-items: baseline; gap: 6px; } .ds-rc-line i { flex: 1 1 10px; border-bottom: 1px dotted var(--ink-3, #5F6673); opacity: .5; transform: translateY(-4px); } .ds-rc-v { flex: none; font-variant-numeric: tabular-nums; white-space: nowrap; } .ds-rc-minus .ds-rc-v { color: var(--red, #C42A20); } .ds-rc-grand { font-weight: 700; font-size: 1rem; } .ds-rc-grand .ds-rc-v { background: var(--mark, #FFE36B); padding: 0 4px; } .ds-rc-foot { margin: 6px 0 0; text-align: center; font-size: .74rem; color: var(--ink-3, #5F6673); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "계산대 앞의 부적",
+    "overview": "결제 직전의 계산대 앞, 카드를 꺼내려는 순간에 노란 부적이 붙어 결제를 막아 세우는 장면이 이 시스템의 중심이다. 화면은 차가운 회색 계산대(배경) 위에 흰 종이 서류를 올려놓은 구조다. 지름 신고서, 세계 보유율 카드, 결제 전 영수증, 보류함 카드가 모두 같은 종이다. 판정만은 괴황지 노랑 부적에 인주 빨강 계열의 도장으로 찍힌다.\n\n분위기는 유쾌하지만 정확하다. 부적, 도장, 손글씨 편지는 장난스럽게 기울어져 있지만, 숫자와 표는 영수증처럼 고정폭 숫자와 점선으로 반듯하게 정렬된다. 장난기는 비유에 담고 정보는 서류처럼 정직하게 보여 준다. 버튼, 칩, 입력칸은 서류와 도장처럼 또렷하다. 테두리가 분명하고, 누르면 도장을 찍듯 확실하게 반응한다.\n\n확정된 거부 목록(사용자 확정): 귀신·공포처럼 겁주는 무속 분위기, 빨간 경고가 화면 곳곳에서 소리치는 경고문 같은 빨강, 색과 효과가 넘치는 알록달록한 게임 화면.",
+    "keyCharacteristics": [
+      "회색 계산대 위의 흰 종이 서류, 그리고 결과마다 단 하나의 노란 부적",
+      "인주 빨강은 도장, 로고, 핵심 숫자처럼 '찍히는' 자리에만",
+      "표제는 간판처럼 굵은 Black Han Sans, 본문은 IBM Plex Sans KR, 금액은 고정폭 Nanum Gothic Coding, 편지만 손글씨 Nanum Pen Script",
+      "기울어진 것은 도장과 편지뿐이고 나머지는 수평으로 정렬",
+      "그림자는 종이 그림자 한 겹",
+      "밝은 모드와 어두운 모드 모두 WCAG AA 대비"
+    ],
+    "rules": [
+      {
+        "name": "The 도장 Rule",
+        "body": "인주 빨강은 찍히는 자리(로고 도장, 주 버튼, 핵심 숫자, 빠지는 돈)에만 쓴다. 넓은 배경, 경고 띠, 여러 개의 경고 표시로 칠하지 않는다.",
+        "section": "colors"
+      },
+      {
+        "name": "The 부적 하나 Rule",
+        "body": "괴황지 노랑 부적은 결과 화면에 하나뿐이다. 노랑을 다른 카드의 바탕으로 넓혀 쓰지 않는다.",
+        "section": "colors"
+      },
+      {
+        "name": "The 지킨 돈 Rule",
+        "body": "저금 초록은 참은 돈, 저금, 필요한 소비처럼 지킨 결정에만 쓴다. 일반적인 성공·확인 색으로 넓혀 쓰지 않는다.",
+        "section": "colors"
+      },
+      {
+        "name": "The 한 굵기 Rule",
+        "body": "Black Han Sans는 굵기 400 하나뿐이다. 700으로 지정해 가짜 굵기를 만들지 않고, 본문이나 긴 문장에는 쓰지 않는다.",
+        "section": "typography"
+      },
+      {
+        "name": "The 영수증 숫자 Rule",
+        "body": "금액과 시간은 고정폭 숫자(tabular-nums)로 오른쪽 정렬한다.",
+        "section": "typography"
+      },
+      {
+        "name": "The 한 겹 Rule",
+        "body": "그림자는 종이 그림자 한 가지다. 겹쳐 쌓거나 더 깊은 그림자, 빛나는 그림자를 새로 만들지 않는다.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "**Do** 새 색을 만들기 전에 `src/style-1.css`의 기존 토큰을 쓴다. 토큰을 바꾸면 밝은 모드 블록과 어두운 모드 두 블록(`prefers-color-scheme: dark`, `[data-theme=\"dark\"]`)을 함께 고치고, 글자 4.5:1·입력칸 테두리 3:1 대비를 두 모드에서 다시 계산한다.",
+      "**Do** 어두운 모드 입력칸 테두리(`field`)는 지금 3.02:1로 기준에 겨우 맞으니, 바꿀 때 더 어둡게 하지 않는다.",
+      "**Do** 토큰을 바꾸면 밝은 모드 값을 직접 적어 둔 `src/card.js`(공유 영수증 이미지), `src/og.html`(링크 미리보기 그림), `src/icon.html`(홈 화면 아이콘)도 함께 고친다.",
+      "**Do** 금액과 시간은 고정폭 숫자로 오른쪽 정렬한다.",
+      "**Do** 움직임은 도장 찍기, 동전 떨어지기, 막대 채우기처럼 비유에 맞는 짧은 것만 쓰고, 움직임 줄이기 설정(`prefers-reduced-motion`)에서는 끈다.",
+      "**Do** 한국어 줄바꿈은 `word-break: keep-all`을 유지한다."
+    ],
+    "donts": [
+      "**Don't** 귀신·공포처럼 겁주는 무속 분위기를 만들지 않는다(사용자 확정).",
+      "**Don't** 인주 빨강으로 경고 띠, 넓은 배경, 여러 개의 경고 표시를 칠하지 않는다(사용자 확정: 경고문 같은 빨강 금지).",
+      "**Don't** 빛나는 그림자, 그라데이션 글자, 무지개색 칩처럼 색과 효과를 늘려 알록달록한 게임 화면으로 만들지 않는다(사용자 확정).",
+      "**Don't** 도장과 편지 말고 다른 요소를 기울이지 않는다.",
+      "**Don't** Black Han Sans를 700으로 지정하거나 본문·긴 문장에 쓰지 않는다.",
+      "**Don't** 판정 부적을 한 화면에 둘 이상 두거나, 괴황지 노랑을 다른 카드의 바탕으로 넓혀 쓰지 않는다."
+    ]
+  }
+}

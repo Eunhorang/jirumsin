@@ -1,0 +1,17 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "broken-image",
+        "value": "*",
+        "files": [
+          "src/body.html"
+        ],
+        "createdAt": "2026-11-01T13:02:16.242Z",
+        "reason": "에이전트 판단: #card-img는 닫힌 영수증 이미지 창 안의 그림이고, card.js가 창을 열기 직전에 src와 alt를 채운다(2026-11-01 critique B에서도 오탐으로 판정)"
+      }
+    ]
+  }
+}
