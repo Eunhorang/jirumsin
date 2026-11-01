@@ -87,6 +87,12 @@ function track(name, data) {
 const priceBand = won => won < 3e4 ? 'under3' : won < 1e5 ? '3to10' : won < 5e5 ? '10to50' : won < 2e6 ? '50to200' : 'over200';
 
 /* ── 지름 신고서 ─────────────────────────── */
+// 예시 칩이 채운 값. 다른 물건을 적기 시작하면 이 값 그대로인 칸만 비운다.
+let exFill = null;
+// 보통 가격과 크게 달라 한 번 확인을 받은 금액. 같은 금액으로 다시 내면 그대로 분석한다.
+let priceOk = null;
+// 직접 고른 종류가 이름으로 짐작한 종류와 다를 때 화면 읽기 프로그램에 읽어 줄 안내
+let typeNote = '';
 function buildForm() {
   $('#examples').innerHTML = EXAMPLES.map((x, i) => `<button class="ex" type="button" data-ex="${i}">${esc(x.item)}</button>`).join('');
   $('#type-seg').innerHTML = TYPES.map(([v, l], i) => `<label class="pick"><input type="radio" name="type" value="${v}"${i === 0 ? ' checked' : ''}><span>${esc(l)}</span></label>`).join('');
@@ -111,7 +117,31 @@ function fillForm(x) {
   $$('input[name="reason"]').forEach(c => { c.checked = (x.reasons || []).includes(c.value); });
   $$('input[name="since"]').forEach(r => { r.checked = r.value === (x.since || 'days'); });
   $('#similar').checked = !!x.similar;
+  exFill = { item: x.item, price: $('#price').value, type: x.type || 'auto', reasons: [...(x.reasons || [])].sort().join(), since: x.since || 'days', similar: !!x.similar };
+  priceOk = null;
+  $('#ex-note').hidden = true;
   syncTypeUI();
+}
+// 예시와 다른 물건을 적기 시작하면, 예시의 가격·종류·이유가 남아 엉뚱한 분석이 나오지 않게 예시 값 그대로인 칸만 비우고 알린다
+function clearExample() {
+  if (!exFill) return;
+  const text = $('#item').value.trim();
+  const was = classify(exFill.item, 'auto').entry, now = text ? classify(text, 'auto').entry : null;
+  if (was && now && was.id === now.id) return; // 같은 물건을 고쳐 적는 중이면 그대로 둔다
+  const x = exFill, gone = [], pick = (name, v) => $(`input[name="${name}"][value="${v}"]`);
+  exFill = null;
+  if (x.price && $('#price').value === x.price) { $('#price').value = ''; gone.push('가격'); }
+  if (x.type !== 'auto' && pick('type', x.type).checked) { pick('type', 'auto').checked = true; gone.push('종류'); }
+  const boxes = $$('input[name="reason"]');
+  if (x.reasons && boxes.filter(c => c.checked).map(c => c.value).sort().join() === x.reasons) { boxes.forEach(c => { c.checked = false; }); gone.push('이유'); }
+  if (x.since !== SINCE[1][0] && pick('since', x.since).checked) { pick('since', SINCE[1][0]).checked = true; gone.push('시기'); }
+  if (x.similar && $('#similar').checked) { $('#similar').checked = false; gone.push('보유 여부'); }
+  if (!gone.length) return;
+  const msg = `예시로 채운 ${gone.join('·')}${j(gone[gone.length - 1], '은/는')} 지웠어요. 내 상황에 맞게 다시 채워 주세요.`;
+  const note = $('#ex-note');
+  note.textContent = msg;
+  note.hidden = false;
+  say(msg);
 }
 function syncTypeUI() {
   const choice = ($('input[name="type"]:checked') || {}).value || 'auto';
@@ -119,11 +149,37 @@ function syncTypeUI() {
   const m = text ? classify(text, choice) : null;
   const type = choice !== 'auto' ? choice : m ? m.type : 'goods';
   $('#price-label').textContent = type === 'sub' ? '월 요금' : type === 'invest' ? '투자 금액' : '가격';
+  $('#price-hint').classList.remove('is-check');
   $('#price-hint').textContent = type === 'invest' ? '얼마를 넣을지 적어 주세요. 비우면 100만 원으로 계산해요.'
     : type === 'sub' ? '한 달 요금이에요. 비우면 보통 요금으로 계산해요.' : '비워 두면 보통 가격으로 계산해요.';
-  $('#type-hint').textContent = choice !== 'auto' ? ''
-    : m ? `자동 감지: ${TYPE_NAME[m.type]}${m.entry ? ` · ${m.entry.label}` : ''}` : '이름을 적으면 종류를 알아서 찾아요.';
+  // 직접 고른 종류가 이름으로 짐작한 종류와 크게 다르면, 고른 것은 그대로 두고 바꿀 길을 알려 준다
+  const guess = text && choice !== 'auto' ? classify(text, 'auto') : null;
+  const off = guess && (guess.entry || detectWords(norm(text))) && guess.type !== choice && !isNear(guess.type, choice);
+  typeNote = '';
+  if (off) {
+    const what = TYPE_NAME[guess.type] + (guess.entry ? ` · ${guess.entry.label}` : '');
+    const to = TYPES.find(([v]) => v === guess.type)[1], mine = TYPES.find(([v]) => v === choice)[1];
+    $('#type-hint').innerHTML = `자동 감지로는 ${esc(what)}${j(what, '이에요/예요')}. <button class="link-btn" type="button" data-type="${guess.type}">${esc(to)}${j(to, '으로/로')} 바꾸기</button>`;
+    typeNote = `종류를 ${mine}${j(mine, '으로/로')} 골랐는데, 자동 감지로는 ${what}${j(what, '이에요/예요')}. 종류에서 바꿀 수 있어요.`;
+  } else {
+    $('#type-hint').textContent = choice !== 'auto' ? ''
+      : m ? `자동 감지: ${TYPE_NAME[m.type]}${m.entry ? ` · ${m.entry.label}` : ''}` : '이름을 적으면 종류를 알아서 찾아요.';
+  }
   $('[data-r="rising"]').hidden = type !== 'invest';
+}
+// 사전에 있는 물건인데 적은 금액이 보통 가격의 10배를 넘거나 10분의 1도 안 되면, 0을 잘못 누르지 않았는지 분석 전에 한 번 묻는다
+function checkPrice(inp) {
+  if (!inp.price || inp.price === priceOk) return true;
+  const m = classify(inp.item, inp.type), e = m.entry;
+  if (!e || !e.price || m.type === 'invest') return true;
+  const r = inp.price / e.price;
+  if (r <= 10 && r >= 0.1) return true;
+  priceOk = inp.price;
+  const hint = $('#price-hint');
+  hint.textContent = `${e.label}의 보통 가격은 ${m.type === 'sub' ? '월 ' : ''}${krw(e.price)}쯤이에요. 적은 ${krw(inp.price)}이 맞으면 '지름신 퇴치하기'를 한 번 더 눌러 주세요.`;
+  hint.classList.add('is-check');
+  $('#price').focus(); // 가격 칸이 이 안내를 설명으로 달고 있어서, 포커스가 가면 화면 읽기 프로그램도 읽는다
+  return false;
 }
 function bindMoney(input) {
   input.addEventListener('input', () => { const n = digits(input.value); input.value = n ? comma(n) : ''; });
@@ -228,6 +284,8 @@ function jarSVG(level, coins) {
 let goalEditing = false;
 function renderJar() {
   const total = jarTotal(), n = state.jar.length, b = state.bought.length, g = state.goal;
+  // 통과 판정에서 산 것(필요한 소비)은 참은 비율에 넣지 않는다
+  const need = state.bought.filter(x => x.need).length, rated = n + b - need;
   const level = g && g.amount ? total / g.amount : Math.min(1, Math.log10(total / 10000 + 1) / 3);
   const goalHTML = g && !goalEditing
     ? `<p><b>${esc(g.name)}</b>까지 ${Math.min(100, Math.round(total / g.amount * 100))}%${total < g.amount ? ` · ${krw(g.amount - total)} 남음` : ' · 목표를 이뤘어요!'}</p>
@@ -244,7 +302,7 @@ function renderJar() {
       <div class="jar-info">
         <p class="eyebrow">지금까지 참은 돈</p>
         <p class="jar-total">${krw(total)}</p>
-        <p class="jar-stats">참은 횟수 ${n}번 · 산 기록 ${b}번${n + b ? ` · 참은 비율 ${Math.round(n / (n + b) * 100)}%` : ''}</p>
+        <p class="jar-stats">참은 횟수 ${n}번 · 산 기록 ${b}번${rated ? ` · 참은 비율 ${Math.round(n / rated * 100)}%${need ? '(필요해서 산 건 빼고)' : ''}` : ''}</p>
         ${goalHTML}
       </div>
     </div>
@@ -254,7 +312,7 @@ function renderJar() {
       ${rows.length ? `<ul class="ledger">${rows.map(x => `
         <li data-id="${esc(x.id)}" data-kind="${x.kind}">
           <span class="nm" id="lg-${esc(x.id)}">${esc(x.name)}</span>
-          <span class="dt">${fmtDate(x.at)} · ${x.kind === 'jar' ? '참았어요' : '샀어요'}</span>
+          <span class="dt">${fmtDate(x.at)} · ${x.kind === 'jar' ? '참았어요' : x.need ? '필요해서 샀어요' : '샀어요'}</span>
           <span class="amt${x.kind === 'jar' ? '' : ' spent'}">${x.kind === 'jar' ? '+' : ''}${krw(x.amount)}</span>
           <button class="link-btn x" type="button" data-j="del" aria-describedby="lg-${esc(x.id)}">지우기</button>
         </li>`).join('')}</ul>`
@@ -326,8 +384,21 @@ function start() {
   buildForm();
   bindMoney($('#price'));
   bindMoney($('#wage'));
-  $('#item').addEventListener('input', () => { $('#item').removeAttribute('aria-invalid'); syncTypeUI(); });
-  $('#type-seg').addEventListener('change', syncTypeUI);
+  // 품목·종류·가격 중 하나라도 바꾸면, 앞서 확인받은 금액은 잊고 다음 제출 때 다시 본다
+  $('#item').addEventListener('input', () => { $('#item').removeAttribute('aria-invalid'); priceOk = null; clearExample(); syncTypeUI(); });
+  // 품목을 다 적고 나왔을 때 고른 종류와 맞지 않으면 화면 읽기 프로그램에도 알린다
+  $('#item').addEventListener('change', () => { if (typeNote) say(typeNote); });
+  $('#price').addEventListener('input', () => { priceOk = null; if ($('#price-hint').classList.contains('is-check')) syncTypeUI(); });
+  $('#type-seg').addEventListener('change', () => { priceOk = null; syncTypeUI(); });
+  $('#type-hint').addEventListener('click', ev => {
+    const b = ev.target.closest('[data-type]');
+    if (!b) return;
+    const r = $(`input[name="type"][value="${b.dataset.type}"]`);
+    r.checked = true;
+    priceOk = null;
+    syncTypeUI();
+    r.focus(); // 누른 링크가 사라지니 포커스를 새로 고른 종류로 옮긴다
+  });
   $('#examples').addEventListener('click', ev => {
     const b = ev.target.closest('[data-ex]');
     if (!b) return;
@@ -343,6 +414,9 @@ function start() {
       toast('무엇을 사고 싶은지 먼저 적어 주세요.');
       return;
     }
+    if (!checkPrice(inp)) return;
+    if ($('#price-hint').classList.contains('is-check')) syncTypeUI(); // 확인을 받았으니 안내 문구를 원래대로 돌린다
+    $('#ex-note').hidden = true;
     analyze(inp);
   });
   $('#result').addEventListener('click', ev => {
@@ -374,6 +448,7 @@ function start() {
       if (!p.hidden) { track('decide', { action: 'buy' }); p.scrollIntoView({ block: 'nearest', behavior: reduceMotion() ? 'auto' : 'smooth' }); }
     } else if (act === 'bought') {
       const x = { id: uid(), name: a.name, amount: Math.round(saveAmount(a)), at: Date.now() };
+      if (a.level.key === 'ok') x.need = true; // 통과 판정에서 산 건 '필요해서 샀어요'로 남기고 참은 비율에서 뺀다
       state.bought.unshift(x);
       saveState();
       settle({ key: 'bought', id: x.id, go: 'jar', msg: '구매를 기록했어요.' }, '구매 기록을 남겼어요. 잘 쓰세요!');

@@ -56,7 +56,7 @@ async function makeCard(a) {
     meta: `지름신 퇴치소 · No.${receiptNo(a)} · ${nowStamp()}`,
     item: `품목 · ${a.name}`,
     foot: `참으면 ${krw(saveAmount(a))}을 지켜요.`,
-    own: `전 세계에서 ${oneIn(o.pct)}${o.pct < 50 ? '만' : '이'} ${ownVerbShort(a.type)} ${o.ref || a.name}`,
+    own: o.none ? o.note : `전 세계에서 ${oneIn(o.pct)}${onlyJ(o.pct)} ${ownVerbShort(a.type)} ${o.ref || a.name}`,
     swap: tiles.length ? `${a.type === 'sub' ? '1년 구독료면' : '이 돈이면'} ${tiles[0].n} ${comma(tiles[0].c)}${tiles[0].u}` : '',
     url: APP_URL.replace(/^https?:\/\//, '').replace(/\/$/, ''),
   };

@@ -5,6 +5,9 @@ const pad = n => String(n).padStart(2, '0');
 const reduceMotion = () => window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
 const srcBadge = (a, key) => a.ai[key] ? '<span class="src ai">Claude 분석</span>' : '<span class="src">기본 추정</span>';
 const saveAmount = a => a.type === 'sub' ? a.money.y1 : a.money.base;
+// 통과 판정이면 이유 구역을 '잘 사는 법'으로 바꾼다. 투자는 권유가 되지 않게 따져 볼 점을 그대로 둔다.
+const buyingWell = a => a.level.key === 'ok' && a.type !== 'invest';
+const reasonList = a => buyingWell(a) ? buyWell(a) : a.reasons;
 const NEG_VERB = { sub: '구독하지 않아요', invest: '갖고 있지 않아요', exp: '하지 않아요' };
 
 function renderResult(a, status) {
@@ -58,18 +61,30 @@ function renderVerdict(a, hit) {
 }
 
 function ownSentence(a) {
-  const o = a.own, who = `전 세계에서 <b>${oneIn(o.pct)}</b>${o.pct < 50 ? '만' : '이'}`;
+  const o = a.own, who = `전 세계에서 <b>${oneIn(o.pct)}</b>${onlyJ(o.pct)}`;
   const what = esc(o.ref || a.name), obj = j(o.ref || a.name, '을/를');
   if (a.type === 'exp') return `한 해 동안 ${who} ${what}${obj} 경험해요.`;
   return `${who} ${what}${obj} ${ownVerb(a.type)}.`;
 }
 function crowdScale(p) { return p >= 2 ? 100 : p >= 0.2 ? 1000 : 10000; }
 function renderOwn(a, animate) {
-  const o = a.own, scale = crowdScale(o.pct), k = Math.min(scale, Math.round(o.pct / 100 * scale));
+  const o = a.own;
+  // 견줄 통계가 없는 품목은 큰 숫자·군중 그림·극빈 기준선 없이 문장으로만 보여 준다. 생필품이면 이미 가진 걸 떠올리게 한다.
+  if (o.none) {
+    const ask = !o.basic ? '' : a.input.similar ? ' 비슷한 걸 이미 가지고 있다고 했어요. 지금 것으로 충분한지 먼저 보세요.' : ' 지금 가진 것 가운데 비슷한 게 있는지부터 떠올려 보세요.';
+    $('#sec-own').innerHTML = `
+  <section class="own" aria-labelledby="own-h">
+    <div class="sec-h"><p class="eyebrow" id="own-h">전 세계 보유율 추정</p>${srcBadge(a, 'own')}</div>
+    <p class="own-sub">${esc(o.note + ask)}</p>
+    <p class="basis">근거 · ${esc(o.basis)}</p>
+  </section>`;
+    return;
+  }
+  const scale = crowdScale(o.pct), k = Math.min(scale, Math.round(o.pct / 100 * scale));
   const place = { 100: '세계가 100명의 마을이라면', 1000: '1,000명이 모인 공연장이라면', 10000: '10,000명이 모인 경기장이라면' }[scale];
   const verb = a.type === 'exp' ? '한 해에 경험하고' : ownVerb(a.type).replace('있어요', '있고');
   const cap = k >= 1
-    ? `${place} ${comma(k)}명${o.pct < 50 ? '만' : '이'} ${verb}, 나머지 ${comma(scale - k)}명은 ${NEG_VERB[a.type] || '없이 살아요'}.`
+    ? `${place} ${comma(k)}명${onlyJ(o.pct)} ${verb}, 나머지 ${comma(scale - k)}명은 ${NEG_VERB[a.type] || '없이 살아요'}.`
     : `${place}, 1명도 없을 가능성이 커요. ${oneIn(o.pct)}꼴이에요.`;
   const broad = o.broad && o.ref ? ` <span class="hint">(${esc(o.ref)} 전체 기준)</span>` : '';
   $('#sec-own').innerHTML = `
@@ -229,18 +244,20 @@ function renderReceipt(a) {
 }
 
 function renderPsych(a) {
+  // 통과 판정이면 '사실 원하는 건 다른 것'이라고 단정하지 않는다(Claude가 준 문장이어도 마찬가지)
   $('#sec-psych').innerHTML = `
     <div class="sec-h"><h3>지금 당신의 지름신은</h3>${srcBadge(a, 'psych')}</div>
-    <p class="want">사실 원하는 건 ${esc(a.name)}보다 <mark>${esc(a.want)}</mark>일지도 몰라요.</p>
+    ${a.level.key === 'ok' ? '' : `<p class="want">사실 원하는 건 ${esc(a.name)}보다 <mark>${esc(a.want)}</mark>일지도 몰라요.</p>`}
     <ul class="psy">${a.psych.map(p => `
       <li><div class="psy-top"><b>${esc(p.n)}</b><span>${p.s}</span></div>
         <div class="bar" role="img" aria-label="${esc(p.n)} 100점 만점에 ${p.s}점"><i class="${p.s >= 60 ? 'hot' : ''}" style="width:${p.s}%"></i></div>
         <p>${esc(p.d)}</p></li>`).join('')}</ul>`;
 }
 function renderReasons(a) {
+  const well = buyingWell(a);
   $('#sec-reasons').innerHTML = `
-    <div class="sec-h"><h3>${a.level.key === 'ok' ? '사기 전에 따져 볼 점' : '사면 안 되는 이유'}</h3>${srcBadge(a, 'reasons')}</div>
-    <ol class="reasons">${a.reasons.map(r => `<li><h4>${esc(r.t)}</h4><p>${esc(r.d)}</p></li>`).join('')}</ol>`;
+    <div class="sec-h"><h3>${well ? '잘 사는 법' : a.level.key === 'ok' ? '사기 전에 따져 볼 점' : '사면 안 되는 이유'}</h3>${well ? '<span class="src">기본 추정</span>' : srcBadge(a, 'reasons')}</div>
+    <ol class="reasons${well ? ' is-ok' : ''}">${reasonList(a).map(r => `<li><h4>${esc(r.t)}</h4><p>${esc(r.d)}</p></li>`).join('')}</ol>`;
 }
 function curveSVG(thrill) {
   const W = 640, H = 230, L = 20, Rr = 20, T = 30, B = 40, span = Math.max(60, Math.round(thrill * 3)), tau = thrill / 2.3;
@@ -299,6 +316,7 @@ function renderLetter(a) {
 const BUY_CHECKS = {
   invest: ['전부 잃어도 생활에 지장 없는 돈이에요', '왜 사는지, 언제 팔지 적어 뒀어요', '전체 자산에서 이 비중이 적당해요', '빌린 돈이 아니에요'],
   sub: ['해지할 날짜를 달력에 적었어요', '겹치는 구독을 정리했어요', '한 달에 네 번 넘게 쓸 거예요'],
+  exp: ['날짜와 예약처를 비교했어요', '할부 없이 낼 수 있는 돈이에요', '취소·환불 규정을 확인했어요'],
   other: ['최저가와 중고 시세를 비교했어요', '할부 없이 낼 수 있는 돈이에요', '반품·환불 기한을 확인했어요', '비슷한 물건을 정리하거나 팔 계획이 있어요'],
 };
 function renderActions(a) {
@@ -306,6 +324,8 @@ function renderActions(a) {
   bar.classList.toggle('is-static', !!a.example);
   bar.classList.toggle('is-done', !!d);
   // 한 분석에는 결정을 하나만 남긴다. 이미 정했으면 결과와 되돌리기만 보여 준다.
+  // 통과 판정이면 사는 쪽도 참는 쪽과 같은 무게(저금 초록)로 두고, '그래도'라는 말을 붙이지 않는다.
+  const ok = a.level.key === 'ok';
   bar.innerHTML = d ? `
     <p class="grow"><b>${esc(a.name)}</b> · ${esc(d.msg)}</p>
     <button class="btn" type="button" data-go="${d.go}">${d.go === 'wait' ? '보류함 보기' : '저금통 보기'}</button>
@@ -316,7 +336,7 @@ function renderActions(a) {
     <div class="hold"><label class="sr-only" for="hold-dur">보류 기간</label>
       <select id="hold-dur"><option value="24">24시간</option><option value="72" selected>72시간</option><option value="168">7일</option><option value="720">30일</option></select>
       <button class="btn" type="button" data-act="hold">보류함에 넣기</button></div>
-    <button class="btn btn-ghost" type="button" data-act="buy">그래도 살래요</button>
+    <button class="btn ${ok ? 'btn-save' : 'btn-ghost'}" type="button" data-act="buy">${ok ? '사기로 했어요' : '그래도 살래요'}</button>
     <button class="btn btn-ghost" type="button" data-act="copy">결과 복사</button>`;
   const checks = BUY_CHECKS[a.type] || BUY_CHECKS.other;
   const panel = $('#buy-panel');
@@ -343,9 +363,9 @@ function summaryText(a) {
   return [
     `[지름신 퇴치소] ${a.name} · ${krw(a.price)}${a.type === 'sub' ? '/월' : ''}`,
     `충동 지수 ${a.score}/100 — ${a.level.head}`,
-    `전 세계 보유율 약 ${fmtPct(o.pct)}% (${oneIn(o.pct)})`,
-    `사실 원하는 것: ${a.want}`,
-    ...a.reasons.map((r, i) => `${i + 1}. ${r.t}`),
+    ...(o.none ? [] : [`전 세계 보유율 약 ${fmtPct(o.pct)}% (${oneIn(o.pct)})`]),
+    ...(a.level.key === 'ok' ? [] : [`사실 원하는 것: ${a.want}`]),
+    ...reasonList(a).map((r, i) => `${i + 1}. ${r.t}`),
     `참으면 ${krw(saveAmount(a))}을 지켜요.`,
     `나도 해 보기: ${APP_URL}`,
   ].join('\n');

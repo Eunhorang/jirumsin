@@ -45,7 +45,8 @@ function aiPrompt(a) {
 원칙
 - 숫자는 근거 있는 추정만 씁니다. 확실하지 않으면 범위를 넓히고 신뢰도를 '낮음'으로 둡니다.
 - 보유율(pct)은 세계 인구 약 83억 명 가운데 지금 이것을 가지고 있는(구독 중인, 보유한, 한 해에 경험하는) 사람의 비율(%)입니다. 기기·계정 수와 사람 수를 구분하고, 계산 근거를 basis에 짧게 적습니다.
-- 사용자를 비난하지 말고 친한 친구처럼 솔직하게 씁니다. 정말 필요한 소비로 보이면 그렇다고 인정합니다.
+- 사용자를 비난하지 말고 친한 친구처럼 솔직하게 씁니다. 정말 필요한 소비로 보이면 그렇다고 인정합니다.${a.level.key === 'ok' ? `
+- 앱의 기본 판정은 '통과'(충동보다 필요나 계획에 가까움)입니다. 편지에서 '사실 원했던 건 다른 것'처럼 단정하지 말고, 따져 보고 내린 결정을 존중하는 쪽으로 씁니다.` : ''}
 - 주식·코인 같은 투자는 특정 종목을 사라거나 팔라고 권하지 않고, 행동 편향과 위험 관리 관점으로만 씁니다.
 - 모든 글은 자연스러운 한국어 해요체로 씁니다. 편지만 반말로 씁니다.
 
@@ -80,9 +81,15 @@ function aiPrompt(a) {
 const numIn = (v, lo, hi) => (typeof v === 'number' && isFinite(v) && v >= lo && v <= hi) ? v : null;
 const str = (v, max = 400) => (typeof v === 'string' && v.trim()) ? v.trim().slice(0, max) : null;
 function recompute(a) {
+  const wasOk = a.level.key === 'ok';
   computeMoney(a);
   scoreAndLevel(a);
   if (!a.ai.verdict) a.line = a.level.line;
+  // Claude가 가격·종류를 바꿔 통과 여부가 달라지면, 심리·이유·편지도 새 판정에 맞게 다시 그린다
+  if (wasOk !== (a.level.key === 'ok')) {
+    if (!a.ai.letter) a.letter = localLetter(a);
+    renderPsych(a); renderReasons(a); renderLetter(a);
+  }
 }
 function applyAI(a, o) {
   switch (o.k) {
@@ -234,7 +241,7 @@ function showChat(a) {
 }
 function chatRules(a) {
   return `당신은 '지름신 퇴치소'의 냉정하지만 다정한 친구입니다. 사용자는 ${a.name}(${krw(a.price)}${a.type === 'sub' ? ', 월 요금' : ''})${j(a.name, '을/를')} 사고 싶어 합니다.
-앞선 분석 요약: 충동 지수 ${a.score}/100, 세계 보유율 약 ${fmtPct(a.own.pct)}%, 사실 원하는 것으로 보이는 것: ${a.want}.
+앞선 분석 요약: 충동 지수 ${a.score}/100, ${a.own.none ? '세계 보유율로 견줄 수 없는 품목(생필품이나 목적지 없는 여행)' : `세계 보유율 약 ${fmtPct(a.own.pct)}%`}, 사실 원하는 것으로 보이는 것: ${a.want}.
 사용자가 사야 하는 이유를 말하면 그 논리를 3~5문장으로 따져 보세요. 타당한 부분은 인정하고, 약한 부분은 구체적으로 짚고, 더 싼 방법이 있으면 제안하세요. 마지막 줄에 "설득 점수: N/10"을 붙이세요. 투자 상품이면 사라거나 팔라고 권하지 마세요. 자연스러운 한국어 해요체로, 마크다운 없이 쓰세요.`;
 }
 async function sendChat(a) {

@@ -178,6 +178,8 @@ h2[tabindex="-1"]:focus { outline: none; }
 .field > legend { margin-bottom: 8px; }
 .opt { font-weight: 400; color: var(--ink-3); margin-left: 6px; }
 .hint { color: var(--ink-3); font-size: var(--t-xs); }
+.hint.is-check { color: var(--ink); font-weight: 600; }
+.hint .link-btn { font-size: inherit; white-space: nowrap; padding: 6px 0; margin: -6px 0; }
 .input, .money input {
   width: 100%; min-width: 0;
   background: var(--paper-2); border: 1.5px solid var(--field); border-radius: var(--r-sm);

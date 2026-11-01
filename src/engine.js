@@ -58,6 +58,8 @@ function hasBatchim(word) {
 const j = (word, pair) => { const [a, b] = pair.split('/'); return hasBatchim(word) ? a : b; };
 const ownVerb = t => ({ sub: '구독하고 있어요', invest: '보유하고 있어요', exp: '한 해에 경험해요' }[t] || '가지고 있어요');
 const ownVerbShort = t => ({ sub: '구독하는', invest: '보유한', exp: '한 해에 경험하는' }[t] || '가진');
+// '만'은 드문 것(20% 미만)에만 붙인다. 흔한 걸 "~명만"이라고 하면 근거의 "흔해요"와 부딪힌다.
+const onlyJ = p => p < 20 ? '만' : '이';
 function hash(s) { let h = 2166136261; for (const ch of String(s)) { h ^= ch.codePointAt(0); h = Math.imul(h, 16777619); } return h >>> 0; }
 function mulberry32(a) { return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
 
@@ -109,6 +111,8 @@ function ownGuess(type, price) {
 }
 function ownership(m, price) {
   const e = m.entry || (m.type === 'invest' ? KB.find(x => x.id === 'stock') : null);
+  // 생필품이나 목적지 없는 여행처럼 '몇 %가 가졌나'로 견줄 수 없는 품목은 숫자 대신 문장으로 보여 준다
+  if (e && e.ownNote) return { none: true, note: e.ownNote, basic: !!e.basic, basis: e.basis, ref: e.label, pct: null, low: null, high: null, kr: null, conf: '낮음', broad: false };
   if (e) {
     const ratio = (e.high - e.low) / e.own;
     let conf = ratio <= .25 ? '높음' : ratio <= .8 ? '보통' : '낮음';
@@ -164,7 +168,10 @@ function levelOf(s, type) {
   if (s >= 70) return { key: 'stop', stamp: `${buy}\n중지`, head: '지름신이 강림했어요', line: `오늘은 ${buy} 버튼에서 손을 떼세요. 이 마음은 내일이면 꽤 식어 있을 거예요.` };
   if (s >= 50) return { key: 'hold', stamp: '72시간\n보류', head: '72시간만 재워 두세요', line: '사고 싶은 마음은 진짜예요. 사흘 뒤에도 같은 마음인지 확인해 봐요.' };
   if (s >= 30) return { key: 'think', stamp: '재고\n요망', head: '한 번 더 따져 볼 만해요', line: '충동이 크진 않아요. 아래 숫자들을 보고 결정해도 늦지 않아요.' };
-  return { key: 'ok', stamp: '통과', head: '필요에 가까운 소비예요', line: '충동보다는 필요에 가까워 보여요. 최저가와 중고부터 확인하고 사세요.' };
+  // 통과 문구도 종류에 맞춘다. 투자는 사라고 권하지 않는다.
+  if (type === 'invest') return { key: 'ok', stamp: '통과', head: '계획에 가까운 결정이에요', line: '충동보다는 계획에 가까워 보여요. 잃어도 생활에 지장 없는 돈인지만 한 번 더 확인하세요.' };
+  const tip = type === 'sub' ? '요금제를 비교하고, 해지할 날짜를 정해 두고 시작하세요.' : type === 'exp' ? '날짜와 값을 비교해 보고 결제하세요.' : '최저가와 중고부터 확인하고 사세요.';
+  return { key: 'ok', stamp: '통과', head: '필요에 가까운 소비예요', line: `충동보다는 필요에 가까워 보여요. ${tip}` };
 }
 function scoreAndLevel(a) {
   const inp = a.input, parts = [['기본값', 30]];
@@ -215,12 +222,14 @@ const R = {
   sale: a => ({ t: '할인은 덜 쓰는 거지 버는 게 아니에요', d: `얼마를 아꼈는지보다 ${krw(a.money.base)}을 쓴다는 사실이 중요해요. 사지 않으면 100% 할인이에요.` }),
   stress: () => ({ t: '기분은 결제보다 빨리 돌아와요', d: '스트레스로 하는 소비는 결제하는 순간이 만족의 꼭대기예요. 카드 명세서가 나올 때 다시 스트레스가 되기 쉬워요.' }),
   limited: () => ({ t: '"지금 아니면"은 판매 전략이에요', d: '품절 임박, 마감 세일, 한정판은 생각할 시간을 빼앗는 장치예요. 정말 필요하면 기회는 또 와요.' }),
-  everyone: a => ({ t: `'다들'은 세계 기준 ${fmtPct(a.own.pct)}%예요`, d: `주변 사람이 다 가진 것처럼 보여도 전 세계에서는 약 ${fmtPct(a.own.pct)}%만 ${ownVerb(a.type)}. 비교하는 범위가 좁아서 생기는 착시예요.` }),
+  everyone: a => a.own.none ? null : ({ t: `'다들'은 세계 기준 ${fmtPct(a.own.pct)}%예요`, d: `주변 사람이 다 가진 것처럼 보여도 전 세계에서는 약 ${fmtPct(a.own.pct)}%만 ${ownVerb(a.type)}. 비교하는 범위가 좁아서 생기는 착시예요.` }),
   sns: () => ({ t: '알고리즘은 당신의 지갑을 알아요', d: '추천 영상과 광고에 자주 보이면 원래 없던 욕구가 생겨요. 영상 속 모습은 잘 연출된 장면이에요.' }),
   reward: () => ({ t: '보상이 매번 결제일 필요는 없어요', d: '수고한 나를 챙기는 건 좋아요. 다만 보상이 늘 결제라면 다음 보상은 더 비싼 걸 원하게 돼요.' }),
   gift: () => ({ t: '선물은 크기보다 마음이에요', d: '받는 사람이 정말 원하는 물건인지 먼저 확인해 보세요. 비싼 선물은 받는 사람에게도 부담이 될 수 있어요.' }),
-  ownRare: a => a.own.pct < 5 ? { t: `세계의 ${restPct(a.own.pct)}%는 없이 살아요`, d: `전 세계에서 이걸 ${ownVerbShort(a.type)} 사람은 ${oneIn(a.own.pct)}이에요. 없어도 아무 문제 없이 사는 게 인류의 기본값이에요.` } : null,
-  ownCommon: a => a.own.pct >= 30 ? { t: '흔한 물건, 바꿔도 일상은 비슷해요', d: `세계 인구의 약 ${fmtPct(a.own.pct)}%가 ${ownVerb(a.type)}. 새로 사도 하루하루가 크게 달라지지는 않아요.` } : null,
+  ownRare: a => !a.own.none && a.own.pct < 5 ? { t: `세계의 ${restPct(a.own.pct)}%는 없이 살아요`, d: `전 세계에서 이걸 ${ownVerbShort(a.type)} 사람은 ${oneIn(a.own.pct)}이에요. 없어도 아무 문제 없이 사는 게 인류의 기본값이에요.` } : null,
+  ownCommon: a => a.own.none
+    ? (a.own.basic ? { t: '흔한 물건, 바꿔도 일상은 비슷해요', d: `${a.own.note} 새로 사도 하루하루가 크게 달라지지는 않아요.` } : null)
+    : a.own.pct >= 30 ? { t: '흔한 물건, 바꿔도 일상은 비슷해요', d: `세계 인구의 약 ${fmtPct(a.own.pct)}%가 ${ownVerb(a.type)}. 새로 사도 하루하루가 크게 달라지지는 않아요.` } : null,
   sub10: a => ({ t: `10년이면 ${krw(a.money.y10)}`, d: `월 ${krw(a.money.M)}은 작아 보여도 1년이면 ${krw(a.money.y1)}, 10년이면 ${krw(a.money.y10)}이에요. 요금 인상은 넣지도 않은 금액이에요.` }),
   subUse: a => ({ t: `한 번 쓸 때마다 ${krw(a.money.perUse)}`, d: `한 달에 ${a.money.usesM}번 쓴다면 1회당 ${krw(a.money.perUse)}이에요. 지난달에 실제로 몇 번 썼는지 확인해 보세요.` }),
   subInertia: () => ({ t: '구독은 잊어버릴 때 돈을 벌어요', d: '무료 체험 뒤 자동 결제, 찾기 어려운 해지 메뉴는 흔한 방식이에요. 가입하기 전에 해지할 날짜부터 정해 두세요.' }),
@@ -258,19 +267,58 @@ function localReasons(a) {
   return out;
 }
 
+/* ── 잘 사는 법 (통과 판정) ─────────────── */
+// 통과 판정이면 사지 말아야 할 이유 대신 덜 내고 잘 사는 방법을 보여 준다. 투자는 권유가 되지 않게 이 목록을 쓰지 않는다.
+const USED_PICK = { phone: '상태 좋은 중고나 공식 리퍼 제품', device: '상태 좋은 중고나 공식 리퍼 제품', console: '상태 좋은 중고 본체', appliance: '전시 상품이나 공식 리퍼 제품', fashion: '상태 좋은 중고·빈티지', car: '인증 중고차' };
+const BW = {
+  price: a => a.type === 'sub' ? { t: '요금제부터 비교해요', d: '같은 서비스도 연간 결제, 가족·듀오 요금제, 통신사 결합에 따라 값이 달라져요. 내 쓰임에 맞는 요금제를 고르세요.' }
+    : a.type === 'exp' ? { t: '날짜와 예약처를 비교해요', d: '같은 여행·공연·식사도 요일과 시기, 예약처에 따라 값이 꽤 달라요. 두세 군데만 비교해도 차이가 보여요.' }
+    : { t: '최저가부터 비교해요', d: '같은 모델도 판매처와 시기에 따라 값이 달라요. 두세 곳만 비교해도 차이가 보여요.' },
+  gift: a => a.input.reasons.includes('gift') ? { t: '받는 사람 취향부터 확인해요', d: '정말 갖고 싶어 하는 건지, 교환할 수 있는지 미리 알아 두면 선물이 서랍에 들어가지 않아요.' } : null,
+  used: a => {
+    if ((a.type !== 'goods' && a.type !== 'luxury') || !(a.cost.dep1 > .1 && a.cost.dep1 < .99)) return null;
+    const pick = USED_PICK[a.cat] || (a.type === 'luxury' ? '정품 인증을 받은 중고' : '상태 좋은 중고');
+    return { t: '중고도 살펴봐요', d: `새것은 1년이면 값의 약 ${Math.round(a.cost.dep1 * 100)}%가 빠져요. ${pick}${j(pick, '을/를')} 고르면 그만큼 아낄 수 있어요.` };
+  },
+  refund: a => a.type === 'sub' ? { t: '해지할 날짜를 정해 둬요', d: '무료 체험이 끝나는 날과 해지 메뉴를 미리 확인해 두면, 덜 쓰게 됐을 때 바로 멈출 수 있어요.' }
+    : a.type === 'exp' ? { t: '취소·환불 규정을 확인해요', d: '일정이 바뀔 때를 대비해, 언제까지 얼마를 돌려받을 수 있는지 결제 전에 확인해 두세요.' }
+    : { t: '반품·교환 조건을 확인해요', d: '받아 보고 생각과 다를 때 돌려보낼 수 있게, 반품 기한과 배송비를 누가 내는지 결제 전에 확인해 두세요.' },
+  resell: a => a.input.similar && a.type !== 'sub' && a.type !== 'exp' ? { t: '쓰던 건 팔거나 물려줘요', d: '비슷한 걸 이미 가지고 있다면, 쓰던 걸 중고로 팔거나 필요한 사람에게 주세요. 실제로 드는 돈과 짐이 함께 줄어요.' } : null,
+  perUse: a => a.type === 'sub' ? { t: `한 번에 ${krw(a.money.perUse)}꼴이에요`, d: `한 달에 ${a.money.usesM}번 쓰면 1회당 ${krw(a.money.perUse)}이에요. 자주 쓸수록 본전을 뽑아요.` } : null,
+  exp: a => a.type === 'exp' ? { t: '경험은 만족이 오래가요', d: '물건보다 경험이 만족을 오래 준다는 연구가 많아요. 사진보다 그 순간을 즐기는 데 마음을 써 보세요.' } : null,
+  cash: a => a.type !== 'sub' && a.money.hours >= 40 ? { t: '할부 없이 낼 수 있는지 봐요', d: `시급 기준으로 ${hm(a.money.hours)}을 일해야 버는 돈이에요. 일시불로 낼 수 있는 범위라면 다음 달 카드값이 가벼워요.` } : null,
+};
+function buyWell(a) {
+  return ['price', 'gift', 'used', 'refund', 'resell', 'perUse', 'exp', 'cash'].map(k => BW[k](a)).filter(Boolean).slice(0, 4);
+}
+
 /* ── 미래의 나에게서 온 편지 ─────────────── */
 function localLetter(a) {
-  const n = a.name, L = ['안녕, 1년 뒤의 나야.'], gift = a.input.reasons.includes('gift');
+  const n = a.name, ok = a.level.key === 'ok', L = ['안녕, 1년 뒤의 나야.'], gift = a.input.reasons.includes('gift');
   if (gift) L.push(`그때 ${n}${j(n, '을/를')} 고르느라 한참 고민했지. 돌아보면 기억에 남은 건 값보다 마음이었어.`);
-  else {
+  else if (ok) {
+    // 통과 판정이면 '사실 원한 건 다른 것'이라고 단정하지 않고, 따져 보고 고른 걸 응원한다. 투자는 결과를 장담하지 않는다.
+    if (a.type === 'invest') L.push(`그때 ${n}${j(n, '을/를')} 서두르지 않고 따져 봤던 거 기억나?`);
+    else {
+      L.push(`그때 ${n}${j(n, '을/를')} ${a.type === 'sub' ? '시작하기' : '결제하기'} 전에 한 번 더 따져 봤던 거 기억나?`);
+      L.push(a.type === 'exp' ? '덕분에 그날 얘기를 지금도 즐겁게 꺼내.' : a.type === 'sub' ? '덕분에 쓸 만큼만 쓰고, 안 쓸 때는 바로 멈출 수 있었어.' : '덕분에 지금도 아깝지 않게 잘 쓰고 있어.');
+    }
+  } else {
     if (a.type === 'invest') L.push(`그때 ${n}${j(n, '을/를')} 살까 말까 차트를 몇 번이나 새로고침했지.`);
     else if (a.type === 'sub') L.push(`그때 ${n} 결제 버튼 앞에서 잠깐 멈췄던 거 기억나?`);
     else L.push(`그때 ${n}${j(n, '을/를')} 장바구니에 넣고 한참 고민했던 거 기억나?`);
     L.push(`솔직히 그때 갖고 싶었던 건 ${n}보다 '${a.want}' 쪽이었던 것 같아.`);
   }
-  if (a.money.hours >= 8) L.push(a.type === 'sub' ? `1년 구독료만 해도 ${hm(a.money.hours)}을 일해야 버는 돈이었잖아.` : `그 돈은 ${hm(a.money.hours)}을 일해야 버는 돈이었잖아.`);
-  if (a.level.key !== 'ok') L.push('딱 사흘만 기다려 줘. 그래도 필요하면 그때 사도 늦지 않으니까.');
-  else L.push(a.type === 'invest' ? '정해 둔 원칙대로 하는 거라면 괜찮아. 남들이 몰릴 때 서두르지만 않으면 돼.' : '필요한 거라면 사도 괜찮아. 대신 최저가는 꼭 확인하고.');
+  if (a.money.hours >= 8) {
+    const h = hm(a.money.hours);
+    if (ok) L.push(a.type === 'sub' ? `1년 구독료가 ${h} 일한 값이라 더 꼼꼼히 골랐지.` : a.type === 'invest' ? `${h}을 일해서 모은 돈이라 더 신중했지.` : `${h}을 일해서 번 돈이라 더 꼼꼼히 골랐지.`);
+    else L.push(a.type === 'sub' ? `1년 구독료만 해도 ${h}을 일해야 버는 돈이었잖아.` : `그 돈은 ${h}을 일해야 버는 돈이었잖아.`);
+  }
+  if (!ok) L.push('딱 사흘만 기다려 줘. 그래도 필요하면 그때 사도 늦지 않으니까.');
+  else L.push(a.type === 'invest' ? '정해 둔 원칙대로 하는 거라면 괜찮아. 남들이 몰릴 때 서두르지만 않으면 돼.'
+    : a.type === 'sub' ? '필요한 거라면 구독해도 괜찮아. 대신 요금제는 꼭 비교하고.'
+    : a.type === 'exp' ? '원하던 경험이라면 해도 괜찮아. 대신 날짜와 값은 꼭 비교하고.'
+    : '필요한 거라면 사도 괜찮아. 대신 최저가는 꼭 확인하고.');
   return L.join(' ');
 }
 

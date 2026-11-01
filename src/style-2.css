@@ -162,6 +162,7 @@
 .reasons li { counter-increment: r; display: grid; grid-template-columns: 2.4rem minmax(0, 1fr); gap: 2px 12px; padding-bottom: 16px; border-bottom: 1px solid var(--rule); }
 .reasons li:last-child { border-bottom: 0; padding-bottom: 0; }
 .reasons li::before { content: counter(r); grid-row: span 2; font-family: var(--font-display); font-size: 2rem; line-height: 1; color: var(--red); }
+.reasons.is-ok li::before { color: var(--save); }
 .reasons h4 { font-size: var(--t-lg); font-weight: 700; }
 .reasons p { color: var(--ink-2); }
 .curve svg { display: block; width: 100%; height: auto; }
